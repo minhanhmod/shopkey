@@ -1879,3 +1879,10 @@ footer {
   }
 
 }
+.profile-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
