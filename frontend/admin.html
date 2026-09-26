@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>PIXELKEY — Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body class="admin-page">
+
+<header class="navbar">
+  <div class="nav-inner">
+
+    <a href="./index.html" class="logo">
+      PIXEL<span>KEY</span>
+    </a>
+
+    <div class="nav-links">
+      <a href="./index.html">Trang chủ</a>
+      <a href="./account.html">Tài khoản</a>
+      <a href="./admin.html" class="active">Admin</a>
+
+      <button id="logoutButton" class="btn btn-outline">
+        Đăng xuất
+      </button>
+    </div>
+
+  </div>
+</header>
+
+
+<main class="admin-container">
+
+  <div class="admin-heading">
+    <div>
+      <div class="section-kicker">CONTROL PANEL</div>
+      <h1>ADMIN DASHBOARD</h1>
+      <p>Quản lý toàn bộ PIXELKEY.</p>
+    </div>
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- STATS -->
+  <!-- ========================= -->
+
+  <section class="admin-stats">
+
+    <div class="admin-stat">
+      <span>TỔNG USER</span>
+      <strong id="statUsers">0</strong>
+    </div>
+
+    <div class="admin-stat">
+      <span>TỔNG GAME</span>
+      <strong id="statProducts">0</strong>
+    </div>
+
+    <div class="admin-stat">
+      <span>TỔNG KEY</span>
+      <strong id="statKeys">0</strong>
+    </div>
+
+    <div class="admin-stat">
+      <span>ĐƠN HÀNG</span>
+      <strong id="statOrders">0</strong>
+    </div>
+
+  </section>
+
+
+  <!-- ========================= -->
+  <!-- USERS -->
+  <!-- ========================= -->
+
+  <section class="admin-panel">
+
+    <div class="admin-panel-header">
+      <div>
+        <div class="section-kicker">USERS</div>
+        <h2>Quản lý tài khoản</h2>
+      </div>
+
+      <input
+        id="userSearch"
+        class="admin-search"
+        type="text"
+        placeholder="Tìm username / email..."
+      >
+    </div>
+
+    <div class="admin-table-wrap">
+
+      <table class="admin-table">
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Số dư</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+
+        <tbody id="usersTable">
+          <tr>
+            <td colspan="7" class="table-loading">
+              Đang tải...
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- ========================= -->
+  <!-- PRODUCTS -->
+  <!-- ========================= -->
+
+  <section class="admin-panel">
+
+    <div class="admin-panel-header">
+
+      <div>
+        <div class="section-kicker">PRODUCTS</div>
+        <h2>Quản lý sản phẩm</h2>
+      </div>
+
+      <button id="newProductButton" class="btn btn-primary">
+        + THÊM GAME
+      </button>
+
+    </div>
+
+    <div class="admin-table-wrap">
+
+      <table class="admin-table">
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên game</th>
+            <th>Danh mục</th>
+            <th>Giá</th>
+            <th>Stock</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+
+        <tbody id="productsTable">
+          <tr>
+            <td colspan="7" class="table-loading">
+              Đang tải...
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- ========================= -->
+  <!-- ORDERS -->
+  <!-- ========================= -->
+
+  <section class="admin-panel">
+
+    <div class="admin-panel-header">
+
+      <div>
+        <div class="section-kicker">ORDERS</div>
+        <h2>Đơn hàng gần đây</h2>
+      </div>
+
+    </div>
+
+    <div class="admin-table-wrap">
+
+      <table class="admin-table">
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Mã đơn</th>
+            <th>User</th>
+            <th>Tổng tiền</th>
+            <th>Thanh toán</th>
+            <th>Trạng thái</th>
+            <th>Ngày</th>
+          </tr>
+        </thead>
+
+        <tbody id="ordersTable">
+          <tr>
+            <td colspan="7" class="table-loading">
+              Đang tải...
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<!-- ========================= -->
+<!-- PRODUCT MODAL -->
+<!-- ========================= -->
+
+<div id="productModal" class="admin-modal hidden">
+
+  <div class="admin-modal-box">
+
+    <button class="modal-close" id="closeProductModal">
+      ×
+    </button>
+
+    <div class="section-kicker">PRODUCT</div>
+
+    <h2 id="productModalTitle">
+      Thêm game
+    </h2>
+
+    <form id="productForm">
+
+      <input type="hidden" id="productId">
+
+      <label>
+        Tên game
+        <input id="productName" required>
+      </label>
+
+      <label>
+        Slug
+        <input id="productSlug">
+      </label>
+
+      <label>
+        Danh mục
+        <input id="productCategory" value="Game">
+      </label>
+
+      <label>
+        Giá
+        <input
+          id="productPrice"
+          type="number"
+          min="0"
+          required
+        >
+      </label>
+
+      <label>
+        Link ảnh
+        <input id="productImage">
+      </label>
+
+      <label>
+        Mô tả
+        <textarea id="productDescription"></textarea>
+      </label>
+
+      <label class="checkbox-row">
+        <input
+          id="productActive"
+          type="checkbox"
+          checked
+        >
+        Đang bán
+      </label>
+
+      <button class="btn btn-primary" type="submit">
+        LƯU SẢN PHẨM
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- KEY MODAL -->
+<!-- ========================= -->
+
+<div id="keyModal" class="admin-modal hidden">
+
+  <div class="admin-modal-box">
+
+    <button class="modal-close" id="closeKeyModal">
+      ×
+    </button>
+
+    <div class="section-kicker">GAME KEYS</div>
+
+    <h2 id="keyModalTitle">
+      Quản lý key
+    </h2>
+
+    <p class="modal-product-name" id="keyProductName"></p>
+
+    <label>
+      Thêm nhiều key
+      <textarea
+        id="keyInput"
+        rows="8"
+        placeholder="Mỗi dòng một key..."
+      ></textarea>
+    </label>
+
+    <button id="addKeysButton" class="btn btn-primary">
+      + THÊM KEY
+    </button>
+
+    <div class="key-list-title">
+      KEY HIỆN TẠI
+    </div>
+
+    <div id="keyList" class="key-list">
+      Đang tải...
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- BALANCE MODAL -->
+<!-- ========================= -->
+
+<div id="balanceModal" class="admin-modal hidden">
+
+  <div class="admin-modal-box">
+
+    <button class="modal-close" id="closeBalanceModal">
+      ×
+    </button>
+
+    <div class="section-kicker">BALANCE</div>
+
+    <h2>Cộng tiền</h2>
+
+    <p id="balanceUserName"></p>
+
+    <input type="hidden" id="balanceUserId">
+
+    <label>
+      Số tiền
+      <input
+        id="balanceAmount"
+        type="number"
+        min="1"
+        placeholder="500000"
+      >
+    </label>
+
+    <button id="addBalanceButton" class="btn btn-primary">
+      CỘNG TIỀN
+    </button>
+
+  </div>
+
+</div>
+
+
+<script src="./js/config.js"></script>
+<script src="./js/api.js"></script>
+<script src="./js/admin.js"></script>
+
+</body>
+</html>

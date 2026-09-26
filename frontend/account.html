@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Tài khoản — PIXELKEY</title>
+
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+<header class="navbar">
+
+  <div class="container nav-inner">
+
+    <a href="./index.html" class="logo">
+      <span class="logo-pixel">PIXEL</span>KEY
+    </a>
+
+    <nav class="nav-links">
+      <a href="./index.html">Trang chủ</a>
+      <a href="./account.html">Tài khoản</a>
+    </nav>
+
+    <button
+      id="logoutButton"
+      class="btn btn-outline"
+    >
+      Đăng xuất
+    </button>
+
+  </div>
+
+</header>
+
+
+<main class="account-page">
+
+  <div class="container">
+
+    <!-- HEADER -->
+
+    <section class="account-header">
+
+      <div>
+
+        <div class="section-label">
+          PIXELKEY ACCOUNT
+        </div>
+
+        <h1>
+          Xin chào,
+          <span id="accountUsername">...</span>
+        </h1>
+
+        <p id="accountEmail">
+          Đang tải thông tin tài khoản...
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- STATS -->
+
+    <section class="account-stats">
+
+      <div class="account-stat-card">
+
+        <div class="stat-icon">
+          💰
+        </div>
+
+        <div>
+          <span>Số dư</span>
+
+          <strong id="accountBalance">
+            0 ₫
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="account-stat-card">
+
+        <div class="stat-icon">
+          🎮
+        </div>
+
+        <div>
+          <span>Đơn hàng</span>
+
+          <strong id="orderCount">
+            0
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="account-stat-card">
+
+        <div class="stat-icon">
+          👤
+        </div>
+
+        <div>
+          <span>Vai trò</span>
+
+          <strong id="accountRole">
+            USER
+          </strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ACCOUNT CONTENT -->
+
+    <section class="account-content">
+
+      <div class="account-section">
+
+        <div class="account-section-title">
+
+          <div>
+            <div class="section-label">
+              PURCHASES
+            </div>
+
+            <h2>Lịch sử mua hàng</h2>
+          </div>
+
+        </div>
+
+
+        <div id="ordersContainer">
+
+          <div class="account-loading">
+            Đang tải lịch sử đơn hàng...
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- PROFILE -->
+
+      <aside class="profile-card">
+
+        <div class="section-label">
+          PROFILE
+        </div>
+
+        <h2>Thông tin tài khoản</h2>
+
+
+        <div class="profile-row">
+
+          <span>Username</span>
+
+          <strong id="profileUsername">
+            ...
+          </strong>
+
+        </div>
+
+
+        <div class="profile-row">
+
+          <span>Email</span>
+
+          <strong id="profileEmail">
+            ...
+          </strong>
+
+        </div>
+
+
+        <div class="profile-row">
+
+          <span>ID tài khoản</span>
+
+          <strong id="profileId">
+            ...
+          </strong>
+
+        </div>
+
+
+        <a
+          href="./index.html"
+          class="btn btn-primary profile-button"
+        >
+          🎮 Tiếp tục mua game
+        </a>
+
+      </aside>
+
+    </section>
+
+  </div>
+
+</main>
+
+
+<footer>
+
+  <div class="container footer-inner">
+
+    <div>
+
+      <div class="logo">
+        <span class="logo-pixel">PIXEL</span>KEY
+      </div>
+
+      <p>
+        Digital Game Keys Store
+      </p>
+
+    </div>
+
+    <div>
+      © 2026 PIXELKEY
+    </div>
+
+  </div>
+
+</footer>
+
+
+<script src="./js/config.js"></script>
+<script src="./js/api.js"></script>
+<script src="./js/account.js"></script>
+
+</body>
+</html>
