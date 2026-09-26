@@ -1,3 +1,3 @@
 const CONFIG = {
-  API_URL: "http://localhost:10000/api"
+  API_URL: "https://pixelkey-api.onrender.com/api"
 };
