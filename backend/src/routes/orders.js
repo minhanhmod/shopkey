@@ -27,10 +27,16 @@ router.post("/", requireAuth, async (req, res) => {
     // Khóa user để tránh 2 giao dịch trừ tiền cùng lúc
     const userResult = await client.query(
       `
-      SELECT id, username, balance, is_active
-      FROM users
-      WHERE id = $1
-      FOR UPDATE
+      SELECT
+  id,
+  username,
+  balance,
+  is_active,
+  role,
+  seller_discount_percent
+FROM users
+WHERE id = $1
+FOR UPDATE
       `,
       [userId]
     );
@@ -90,8 +96,22 @@ router.post("/", requireAuth, async (req, res) => {
       });
     }
 
-    const price = Number(product.price);
-    const balance = Number(user.balance);
+const originalPrice = Number(product.price);
+
+const sellerDiscountPercent =
+  user.role === "seller"
+    ? Number(user.seller_discount_percent || 0)
+    : 0;
+
+const discount = Number(
+  (originalPrice * sellerDiscountPercent / 100).toFixed(2)
+);
+
+const price = Number(
+  (originalPrice - discount).toFixed(2)
+);
+
+const balance = Number(user.balance);
 
     if (balance < price) {
       await client.query("ROLLBACK");
