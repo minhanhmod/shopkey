@@ -2677,3 +2677,112 @@ footer {
     width: 100%;
   }
 }
+/* PAYOS QR */
+.topup-qr-title {
+  margin-top: 22px;
+  margin-bottom: 12px;
+  text-align: center;
+  color: var(--neon);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.topup-qr-frame {
+  width: 304px;
+  min-height: 304px;
+  margin: 0 auto 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+
+  padding: 10px;
+
+  border: 4px solid var(--neon);
+
+  /* khung kiểu pixel */
+  box-shadow:
+    0 0 0 3px #050505,
+    0 0 0 7px var(--neon),
+    0 0 20px rgba(170, 255, 0, 0.45);
+
+  box-sizing: border-box;
+}
+
+.topup-qr-frame img,
+.topup-qr-frame canvas {
+  display: block;
+  width: 280px !important;
+  height: 280px !important;
+}
+
+.topup-bank-info {
+  margin: 20px 0;
+  padding: 16px;
+
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.topup-bank-info div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+
+  padding: 9px 0;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.topup-bank-info div:last-child {
+  border-bottom: none;
+}
+
+.topup-bank-info span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.topup-bank-info strong {
+  color: var(--text);
+  text-align: right;
+}
+
+.topup-transfer-content {
+  margin: 16px 0 !important;
+  padding: 14px;
+
+  border: 1px solid var(--neon);
+  background: rgba(170, 255, 0, 0.05);
+}
+
+.topup-transfer-content strong {
+  color: var(--neon);
+}
+
+@media (max-width: 600px) {
+  .topup-qr-frame {
+    width: 294px;
+    min-height: 294px;
+  }
+
+  .topup-qr-frame img,
+  .topup-qr-frame canvas {
+    width: 270px !important;
+    height: 270px !important;
+  }
+
+  .topup-bank-info div {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .topup-bank-info strong {
+    text-align: left;
+  }
+}
