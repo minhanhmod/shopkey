@@ -500,116 +500,218 @@ async function loadCurrentUser() {
 
 }
 
-
 // ============================
-// LOAD PRODUCTS
+// LOAD FOLDERS
 // ============================
-function renderProxyFolder(
-  proxyProducts,
-  normalProducts
-) {
+async function loadFolders() {
 
-  if (!proxyProducts.length) {
+  const container =
+    document.getElementById("foldersGrid");
+
+  if (!container) {
     return;
   }
 
-  const proxyFolder =
-    document.createElement("div");
+  container.innerHTML =
+    `<div class="loading">Đang tải danh mục...</div>`;
 
-  proxyFolder.className =
-    "proxy-folder";
+  try {
 
-  proxyFolder.innerHTML = `
-    <div class="proxy-folder-header">
+    const response =
+      await API.get(
+        "/products/folders/list"
+      );
 
-      <div class="proxy-folder-icon">
-        🌐
-      </div>
+    const folderList =
+      response.folders || [];
 
-      <div class="proxy-folder-info">
+    if (!folderList.length) {
 
-        <div class="proxy-folder-title">
-          PROXY
-        </div>
+      container.innerHTML =
+        `<div class="loading">
+          Chưa có danh mục nào.
+        </div>`;
 
-        <div class="proxy-folder-subtitle">
-          Proxy 1 ngày · Proxy 30 ngày
-        </div>
+      return;
+    }
 
-      </div>
+    container.innerHTML =
+      folderList.map(folder => {
 
-      <button
-        type="button"
-        class="proxy-folder-button"
-      >
-        XEM PROXY
-      </button>
+        const productCount =
+          Array.isArray(folder.products)
+            ? folder.products.length
+            : 0;
 
-    </div>
-  `;
+        const imageHtml =
+          folder.image_url
+            ? `
+              <img
+                src="${escapeHtml(folder.image_url)}"
+                alt="${escapeHtml(folder.name)}"
+                class="product-image"
+              >
+            `
+            : `
+              <div class="product-image">
+                📦
+              </div>
+            `;
 
-  productsGrid.appendChild(
-    proxyFolder
-  );
+        return `
+          <article class="product-card folder-card">
 
+            ${imageHtml}
 
-  const button =
-    proxyFolder.querySelector(
-      ".proxy-folder-button"
+            <div class="product-content">
+
+              <h3>
+                ${escapeHtml(folder.name)}
+              </h3>
+
+              <p>
+                ${escapeHtml(
+                  folder.description || ""
+                )}
+              </p>
+
+              <div class="product-meta">
+                ${productCount} sản phẩm
+              </div>
+
+              <button
+                type="button"
+                class="btn btn-primary folder-view-button"
+                data-folder-id="${folder.id}"
+              >
+                ${escapeHtml(
+                  folder.button_text ||
+                  "XEM SẢN PHẨM"
+                )}
+              </button>
+
+            </div>
+
+          </article>
+        `;
+
+      }).join("");
+
+    container
+      .querySelectorAll(
+        ".folder-view-button"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const folderId =
+              Number(
+                button.dataset.folderId
+              );
+
+            showFolderProducts(
+              folderList,
+              folderId
+            );
+
+          }
+        );
+
+      });
+
+  } catch (error) {
+
+    console.error(
+      "LOAD FOLDERS ERROR:",
+      error
     );
 
+    container.innerHTML =
+      `<div class="loading">
+        Không thể tải danh mục.
+      </div>`;
+  }
+}
 
-  button.addEventListener(
+
+// ============================
+// SHOW FOLDER PRODUCTS
+// ============================
+function showFolderProducts(
+  folderList,
+  folderId
+) {
+
+  const folder =
+    folderList.find(
+      item =>
+        Number(item.id) ===
+        Number(folderId)
+    );
+
+  if (!folder) {
+    return;
+  }
+
+  const products =
+    Array.isArray(folder.products)
+      ? folder.products
+      : [];
+
+  if (typeof productsGrid === "undefined") {
+    return;
+  }
+
+  productsGrid.innerHTML = "";
+
+  if (!products.length) {
+
+    productsGrid.innerHTML = `
+      <div class="loading">
+        Folder này chưa có sản phẩm.
+      </div>
+    `;
+
+    return;
+  }
+
+  renderProducts(products);
+
+  const backButton =
+    document.createElement("button");
+
+  backButton.type =
+    "button";
+
+  backButton.className =
+    "proxy-back-button";
+
+  backButton.textContent =
+    "← QUAY LẠI DANH MỤC";
+
+  productsGrid.prepend(
+    backButton
+  );
+
+  backButton.addEventListener(
     "click",
     () => {
 
       productsGrid.innerHTML = "";
 
-      renderProducts(
-        proxyProducts
-      );
-
-
-      const backButton =
-        document.createElement("button");
-
-      backButton.type =
-        "button";
-
-      backButton.className =
-        "proxy-back-button";
-
-      backButton.textContent =
-        "← QUAY LẠI";
-
-
-      productsGrid.prepend(
-        backButton
-      );
-
-
-      backButton.addEventListener(
-        "click",
-        () => {
-
-          productsGrid.innerHTML = "";
-
-          renderProducts(
-            normalProducts
-          );
-
-          renderProxyFolder(
-            proxyProducts,
-            normalProducts
-          );
-
-        }
-      );
+      loadProducts();
 
     }
   );
-
 }
+
+// ============================
+// LOAD PRODUCTS
+// ============================
+
 async function loadProducts() {
 
   try {
@@ -947,9 +1049,10 @@ async function initHome() {
 
   await loadCurrentUser();
 
+  await loadFolders();
+
   await loadProducts();
 
 }
-
 
 initHome();
