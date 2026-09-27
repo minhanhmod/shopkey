@@ -34,6 +34,35 @@ const profileId =
 
 const ordersContainer =
   document.getElementById("ordersContainer");
+const topupAmount =
+  document.getElementById("topupAmount");
+
+const createTopup =
+  document.getElementById("createTopup");
+
+const topupMessage =
+  document.getElementById("topupMessage");
+
+const topupResult =
+  document.getElementById("topupResult");
+
+const topupQr =
+  document.getElementById("topupQr");
+
+const topupOrderCode =
+  document.getElementById("topupOrderCode");
+
+const topupOrderAmount =
+  document.getElementById("topupOrderAmount");
+
+const topupStatus =
+  document.getElementById("topupStatus");
+
+const topupCheckout =
+  document.getElementById("topupCheckout");
+
+let currentTopupOrderCode = null;
+let topupPollTimer = null;
 
 
 function formatMoney(value) {
@@ -406,5 +435,220 @@ async function initAccount() {
 
 }
 
+function showTopupMessage(message, type = "") {
+  if (!topupMessage) return;
+
+  topupMessage.textContent = message;
+  topupMessage.className =
+    `topup-message ${type}`;
+}
+
+
+function formatTopupStatus(status) {
+  const statuses = {
+    pending: "ĐANG CHỜ THANH TOÁN",
+    paid: "✓ NẠP TIỀN THÀNH CÔNG",
+    cancelled: "ĐÃ HỦY",
+    expired: "ĐÃ HẾT HẠN"
+  };
+
+  return statuses[status] || status;
+}
+
+
+async function createTopupOrder() {
+  const amount = Number(
+    topupAmount?.value
+  );
+
+  if (!amount || amount < 10000) {
+    showTopupMessage(
+      "Số tiền nạp tối thiểu là 10.000đ.",
+      "error"
+    );
+
+    topupAmount?.focus();
+
+    return;
+  }
+
+  if (amount > 50000000) {
+    showTopupMessage(
+      "Số tiền nạp tối đa là 50.000.000đ.",
+      "error"
+    );
+
+    return;
+  }
+
+  createTopup.disabled = true;
+  createTopup.textContent =
+    "ĐANG TẠO ĐƠN...";
+
+  showTopupMessage(
+    "Đang tạo đơn nạp PayOS...",
+    "loading"
+  );
+
+  try {
+    const data = await API.post(
+      "/topups",
+      {
+        amount
+      }
+    );
+
+    currentTopupOrderCode =
+      data.orderCode;
+
+    topupOrderCode.textContent =
+      data.orderCode;
+
+    topupOrderAmount.textContent =
+      formatMoney(data.amount);
+
+    topupCheckout.href =
+      data.checkoutUrl || "#";
+
+    topupStatus.textContent =
+      "ĐANG CHỜ THANH TOÁN";
+
+    topupResult.hidden = false;
+
+    showTopupMessage(
+      "Đơn nạp đã được tạo. Hãy quét QR hoặc mở PayOS để thanh toán.",
+      "success"
+    );
+
+    // Tạo QR từ chuỗi QR PayOS
+    if (
+      data.qrCode &&
+      typeof QRCode !== "undefined"
+    ) {
+      QRCode.toCanvas(
+        topupQr,
+        data.qrCode,
+        {
+          width: 190,
+          margin: 2
+        },
+        (error) => {
+          if (error) {
+            console.error(
+              "QR error:",
+              error
+            );
+          }
+        }
+      );
+    }
+
+    clearInterval(topupPollTimer);
+
+    topupPollTimer =
+      setInterval(
+        checkTopupStatus,
+        3000
+      );
+
+  } catch (error) {
+    console.error(error);
+
+    showTopupMessage(
+      error.message ||
+        "Không thể tạo đơn nạp tiền.",
+      "error"
+    );
+  } finally {
+    createTopup.disabled = false;
+
+    createTopup.textContent =
+      "💳 Nạp tiền qua PayOS";
+  }
+}
+
+
+async function checkTopupStatus() {
+  if (!currentTopupOrderCode) {
+    return;
+  }
+
+  try {
+    const data = await API.get(
+      `/topups/${currentTopupOrderCode}`
+    );
+
+    const status =
+      String(data.status || "")
+        .toLowerCase();
+
+    topupStatus.textContent =
+      formatTopupStatus(status);
+
+    if (status === "paid") {
+      clearInterval(topupPollTimer);
+
+      showTopupMessage(
+        "✓ Nạp tiền thành công! Số dư của bạn đã được cộng.",
+        "success"
+      );
+
+      await loadAccount();
+
+      topupStatus.classList.add(
+        "paid"
+      );
+    }
+
+    if (
+      status === "cancelled" ||
+      status === "expired"
+    ) {
+      clearInterval(topupPollTimer);
+
+      showTopupMessage(
+        "Đơn nạp tiền đã hết hạn hoặc bị hủy.",
+        "error"
+      );
+    }
+
+  } catch (error) {
+    console.error(
+      "Topup status error:",
+      error
+    );
+  }
+}
+
+
+// Nút số tiền nhanh
+
+document
+  .querySelectorAll("[data-topup]")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        topupAmount.value =
+          button.dataset.topup;
+
+        topupAmount.focus();
+
+      }
+    );
+
+  });
+
+
+// Tạo đơn nạp
+
+if (createTopup) {
+  createTopup.addEventListener(
+    "click",
+    createTopupOrder
+  );
+}
 
 initAccount();
