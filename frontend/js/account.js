@@ -123,9 +123,11 @@ async function loadAccount() {
 
 
     accountRole.textContent =
-      user.role === "admin"
-        ? "ADMIN"
-        : "USER";
+  user.role === "admin"
+    ? "ADMIN"
+    : user.role === "seller"
+      ? "SELLER"
+      : "USER";
 
 
     profileUsername.textContent =
