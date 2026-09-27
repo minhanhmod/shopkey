@@ -8,6 +8,8 @@ let currentUser = null;
 let users = [];
 let products = [];
 let currentKeyProductId = null;
+let folders = [];
+let currentFolderId = null;
 
 
 // ============================
@@ -706,7 +708,399 @@ function renderProducts(list) {
 
 }
 
+async function loadFolders() {
+  const container = document.getElementById("foldersAdminList");
 
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="table-loading">
+      Đang tải folder...
+    </div>
+  `;
+
+  try {
+    const result = await API.get("/admin/folders");
+
+    folders = result.folders || [];
+
+    renderFolders();
+  } catch (error) {
+    console.error("LOAD FOLDERS ERROR:", error);
+
+    container.innerHTML = `
+      <div class="admin-error">
+        Không thể tải danh sách folder.
+      </div>
+    `;
+  }
+}
+
+
+function renderFolders() {
+  const container =
+    document.getElementById("foldersAdminList");
+
+  if (!container) {
+    return;
+  }
+
+  if (!folders.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        Chưa có folder nào.
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML = folders.map(folder => {
+
+    const image = folder.image_url
+      ? `
+        <img
+          src="${escapeHtml(folder.image_url)}"
+          alt="${escapeHtml(folder.name)}"
+          class="admin-folder-image"
+        >
+      `
+      : `
+        <div class="admin-folder-no-image">
+          📁
+        </div>
+      `;
+
+    return `
+      <div
+        class="admin-folder-card"
+        data-folder-id="${folder.id}"
+      >
+
+        <div class="admin-folder-preview">
+          ${image}
+        </div>
+
+        <div class="admin-folder-content">
+
+          <div class="admin-folder-name">
+            ${escapeHtml(folder.name)}
+          </div>
+
+          <div class="admin-folder-description">
+            ${escapeHtml(
+              folder.description || "Không có mô tả"
+            )}
+          </div>
+
+          <div class="admin-folder-meta">
+
+            <span>
+              Nút:
+              <strong>
+                ${escapeHtml(
+                  folder.button_text
+                )}
+              </strong>
+            </span>
+
+            <span>
+              Thứ tự:
+              <strong>
+                ${folder.sort_order}
+              </strong>
+            </span>
+
+            <span>
+              ${
+                folder.is_active
+                  ? "🟢 Đang hiển thị"
+                  : "🔴 Đang ẩn"
+              }
+            </span>
+
+          </div>
+
+          <div class="admin-folder-actions">
+
+            <button
+              type="button"
+              class="btn btn-secondary edit-folder-button"
+              data-folder-id="${folder.id}"
+            >
+              SỬA
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-danger delete-folder-button"
+              data-folder-id="${folder.id}"
+            >
+              XÓA
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+    `;
+  }).join("");
+
+  bindFolderButtons();
+}
+
+
+function bindFolderButtons() {
+
+  document
+    .querySelectorAll(".edit-folder-button")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+          const folderId =
+            Number(button.dataset.folderId);
+
+          openFolderForm(folderId);
+        }
+      );
+
+    });
+
+
+  document
+    .querySelectorAll(".delete-folder-button")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+          const folderId =
+            Number(button.dataset.folderId);
+
+          deleteFolder(folderId);
+        }
+      );
+
+    });
+
+}
+function openFolderForm(folderId = null) {
+  const form = document.getElementById("folderForm");
+
+  if (!form) {
+    return;
+  }
+
+  currentFolderId = folderId;
+
+  const folder = folderId
+    ? folders.find(
+        item => Number(item.id) === Number(folderId)
+      )
+    : null;
+
+  document.getElementById("folderId").value =
+    folder ? folder.id : "";
+
+  document.getElementById("folderName").value =
+    folder ? folder.name : "";
+
+  document.getElementById("folderButtonText").value =
+    folder
+      ? folder.button_text
+      : "XEM SẢN PHẨM";
+
+  document.getElementById("folderDescription").value =
+    folder
+      ? folder.description || ""
+      : "";
+
+  document.getElementById("folderImageUrl").value =
+    folder
+      ? folder.image_url || ""
+      : "";
+
+  document.getElementById("folderSortOrder").value =
+    folder
+      ? folder.sort_order
+      : 0;
+
+  document.getElementById("folderIsActive").checked =
+    folder
+      ? folder.is_active
+      : true;
+
+  form.style.display = "block";
+
+  form.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+function closeFolderForm() {
+  const form = document.getElementById("folderForm");
+
+  if (form) {
+    form.style.display = "none";
+  }
+
+  currentFolderId = null;
+}
+async function saveFolder() {
+  const folderId =
+    document.getElementById("folderId").value.trim();
+
+  const name =
+    document.getElementById("folderName").value.trim();
+
+  const buttonText =
+    document.getElementById("folderButtonText").value.trim();
+
+  const description =
+    document.getElementById("folderDescription").value.trim();
+
+  const imageUrl =
+    document.getElementById("folderImageUrl").value.trim();
+
+  const sortOrder =
+    Number(
+      document.getElementById("folderSortOrder").value
+    ) || 0;
+
+  const isActive =
+    document.getElementById("folderIsActive").checked;
+
+  if (!name) {
+    alert("Vui lòng nhập tên Folder.");
+    return;
+  }
+
+  const data = {
+    name,
+    button_text:
+      buttonText || "XEM SẢN PHẨM",
+    description,
+    image_url: imageUrl,
+    sort_order: sortOrder,
+    is_active: isActive
+  };
+
+  try {
+
+    if (folderId) {
+
+      await API.put(
+        `/admin/folders/${folderId}`,
+        data
+      );
+
+      alert("Đã cập nhật Folder.");
+
+    } else {
+
+      await API.post(
+        "/admin/folders",
+        data
+      );
+
+      alert("Đã tạo Folder.");
+    }
+
+    closeFolderForm();
+
+    await loadFolders();
+
+  } catch (error) {
+
+    console.error(
+      "SAVE FOLDER ERROR:",
+      error
+    );
+
+    alert(
+      error.message ||
+      "Không thể lưu Folder."
+    );
+  }
+}
+async function deleteFolder(folderId) {
+  const folder = folders.find(
+    item => Number(item.id) === Number(folderId)
+  );
+
+  if (!folder) {
+    return;
+  }
+
+  const confirmed = confirm(
+    `Bạn có chắc muốn xóa Folder "${folder.name}" không?`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+
+    await API.delete(
+      `/admin/folders/${folderId}`
+    );
+
+    alert("Đã xóa Folder.");
+
+    await loadFolders();
+
+  } catch (error) {
+
+    console.error(
+      "DELETE FOLDER ERROR:",
+      error
+    );
+
+    alert(
+      error.message ||
+      "Không thể xóa Folder."
+    );
+  }
+}
+function initFolderEvents() {
+  const newFolderButton =
+    document.getElementById("newFolderButton");
+
+  if (newFolderButton) {
+    newFolderButton.addEventListener(
+      "click",
+      () => {
+        openFolderForm();
+      }
+    );
+  }
+
+  const saveFolderButton =
+    document.getElementById("saveFolderButton");
+
+  if (saveFolderButton) {
+    saveFolderButton.addEventListener(
+      "click",
+      saveFolder
+    );
+  }
+
+  const cancelFolderButton =
+    document.getElementById("cancelFolderButton");
+
+  if (cancelFolderButton) {
+    cancelFolderButton.addEventListener(
+      "click",
+      closeFolderForm
+    );
+  }
+}
 // ============================
 // PRODUCT MODAL
 // ============================
@@ -1274,8 +1668,11 @@ async function initAdmin() {
     loadStats(),
     loadUsers(),
     loadProducts(),
-    loadOrders()
+    loadOrders(),
+    loadFolders()
   ]);
+
+  initFolderEvents();
 }
 
 initAdmin();
