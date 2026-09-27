@@ -105,6 +105,7 @@ router.get("/users", async (req, res) => {
         email,
         role,
         balance,
+        seller_discount_percent,
         is_active,
         created_at
       FROM users
@@ -125,9 +126,144 @@ router.get("/users", async (req, res) => {
 });
 
 // =====================================
-// KHÓA / MỞ TÀI KHOẢN
+// QUẢN LÝ SELLER
 // =====================================
 
+/*
+  PUT /api/admin/users/:userId/role
+
+  Admin nâng USER -> SELLER
+  hoặc hạ SELLER -> USER
+*/
+router.put("/users/:userId/role", async (req, res) => {
+  try {
+    const userId = Number(req.params.userId);
+    const role = String(req.body.role || "").toLowerCase();
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        message: "userId không hợp lệ"
+      });
+    }
+
+    if (!["user", "seller"].includes(role)) {
+      return res.status(400).json({
+        message: "Role chỉ được là user hoặc seller"
+      });
+    }
+
+    // Không cho Admin tự thay đổi quyền của chính mình
+    if (userId === Number(req.user.sub)) {
+      return res.status(400).json({
+        message: "Không thể thay đổi quyền của chính tài khoản admin"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET
+        role = $1,
+        updated_at = NOW()
+      WHERE id = $2
+        AND role <> 'admin'
+      RETURNING
+        id,
+        username,
+        email,
+        role,
+        balance,
+        seller_discount_percent,
+        is_active
+      `,
+      [role, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Không tìm thấy user hoặc không thể thay đổi tài khoản admin"
+      });
+    }
+
+    return res.json({
+      message: role === "seller"
+        ? "Đã nâng tài khoản thành Seller"
+        : "Đã hạ tài khoản về User",
+
+      user: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("ADMIN CHANGE ROLE ERROR:", error);
+
+    return res.status(500).json({
+      message: "Không thể thay đổi quyền tài khoản"
+    });
+  }
+});
+
+
+/*
+  PUT /api/admin/users/:userId/seller-discount
+
+  Admin chỉnh % giảm giá cho Seller
+*/
+router.put("/users/:userId/seller-discount", async (req, res) => {
+  try {
+    const userId = Number(req.params.userId);
+    const discount = Number(req.body.discount_percent);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        message: "userId không hợp lệ"
+      });
+    }
+
+    if (!Number.isFinite(discount) || discount < 0 || discount > 90) {
+      return res.status(400).json({
+        message: "Mức giảm phải từ 0% đến 90%"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET
+        seller_discount_percent = $1,
+        updated_at = NOW()
+      WHERE id = $2
+        AND role = 'seller'
+      RETURNING
+        id,
+        username,
+        email,
+        role,
+        balance,
+        seller_discount_percent,
+        is_active
+      `,
+      [discount, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Không tìm thấy Seller"
+      });
+    }
+
+    return res.json({
+      message: "Đã cập nhật mức giảm giá Seller",
+      user: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("ADMIN SELLER DISCOUNT ERROR:", error);
+
+    return res.status(500).json({
+      message: "Không thể cập nhật mức giảm giá Seller"
+    });
+  }
+});
 router.put("/users/:userId/status", async (req, res) => {
   try {
     const userId = Number(req.params.userId);
