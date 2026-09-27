@@ -504,7 +504,112 @@ async function loadCurrentUser() {
 // ============================
 // LOAD PRODUCTS
 // ============================
+function renderProxyFolder(
+  proxyProducts,
+  normalProducts
+) {
 
+  if (!proxyProducts.length) {
+    return;
+  }
+
+  const proxyFolder =
+    document.createElement("div");
+
+  proxyFolder.className =
+    "proxy-folder";
+
+  proxyFolder.innerHTML = `
+    <div class="proxy-folder-header">
+
+      <div class="proxy-folder-icon">
+        🌐
+      </div>
+
+      <div class="proxy-folder-info">
+
+        <div class="proxy-folder-title">
+          PROXY
+        </div>
+
+        <div class="proxy-folder-subtitle">
+          Proxy 1 ngày · Proxy 30 ngày
+        </div>
+
+      </div>
+
+      <button
+        type="button"
+        class="proxy-folder-button"
+      >
+        XEM PROXY
+      </button>
+
+    </div>
+  `;
+
+  productsGrid.appendChild(
+    proxyFolder
+  );
+
+
+  const button =
+    proxyFolder.querySelector(
+      ".proxy-folder-button"
+    );
+
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      productsGrid.innerHTML = "";
+
+      renderProducts(
+        proxyProducts
+      );
+
+
+      const backButton =
+        document.createElement("button");
+
+      backButton.type =
+        "button";
+
+      backButton.className =
+        "proxy-back-button";
+
+      backButton.textContent =
+        "← QUAY LẠI";
+
+
+      productsGrid.prepend(
+        backButton
+      );
+
+
+      backButton.addEventListener(
+        "click",
+        () => {
+
+          productsGrid.innerHTML = "";
+
+          renderProducts(
+            normalProducts
+          );
+
+          renderProxyFolder(
+            proxyProducts,
+            normalProducts
+          );
+
+        }
+      );
+
+    }
+  );
+
+}
 async function loadProducts() {
 
   try {
@@ -533,7 +638,36 @@ async function loadProducts() {
       data.products || [];
 
 
-    renderProducts(products);
+    // ============================
+    // TÁCH SẢN PHẨM PROXY
+    // ============================
+
+    const proxyProducts =
+      products.filter(product =>
+        String(product.category || "")
+          .toUpperCase()
+          .includes("PROXY")
+      );
+
+
+    const normalProducts =
+      products.filter(product =>
+        !String(product.category || "")
+          .toUpperCase()
+          .includes("PROXY")
+      );
+
+
+    renderProducts(
+      normalProducts
+    );
+
+
+    // Hiển thị PROXY bên dưới
+   renderProxyFolder(
+  proxyProducts,
+  normalProducts
+);
 
   } catch (error) {
 
@@ -558,8 +692,6 @@ async function loadProducts() {
   }
 
 }
-
-
 // ============================
 // BUY PRODUCT
 // ============================
