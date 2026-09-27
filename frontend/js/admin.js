@@ -191,19 +191,44 @@ function renderUsers(list) {
               + TIỀN
             </button>
 
-            ${
-              user.role !== "admin"
-                ? `
-                  <button
-                    class="small-btn toggle-user"
-                    data-id="${user.id}"
-                    data-active="${active}"
-                  >
-                    ${active ? "KHÓA" : "MỞ"}
-                  </button>
-                `
-                : ""
-            }
+${
+  user.role !== "admin"
+    ? `
+      <button
+        class="small-btn toggle-user"
+        data-id="${user.id}"
+        data-active="${active}"
+      >
+        ${active ? "KHÓA" : "MỞ"}
+      </button>
+
+      ${
+        user.role === "seller"
+          ? `
+            <button
+              class="small-btn seller-btn"
+              data-id="${user.id}"
+              data-role="seller"
+              data-name="${escapeHtml(user.username)}"
+              data-discount="${Number(user.seller_discount_percent || 0)}"
+            >
+              SELLER ${Number(user.seller_discount_percent || 0)}%
+            </button>
+          `
+          : `
+            <button
+              class="small-btn seller-btn"
+              data-id="${user.id}"
+              data-role="user"
+              data-name="${escapeHtml(user.username)}"
+            >
+              NÂNG SELLER
+            </button>
+          `
+      }
+    `
+    : ""
+}
 
           </div>
 
@@ -243,8 +268,124 @@ function renderUsers(list) {
       });
 
     });
+  document.querySelectorAll(".seller-btn")
+  .forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      changeSellerRole(
+        Number(button.dataset.id),
+        button.dataset.role,
+        button.dataset.name
+      );
+
+    });
+
+  });
+  document.querySelectorAll(".seller-btn[data-role='seller']")
+  .forEach(button => {
+
+    button.addEventListener("dblclick", () => {
+
+      changeSellerDiscount(
+        Number(button.dataset.id),
+        button.dataset.name,
+        Number(button.dataset.discount || 0)
+      );
+
+    });
+
+  });
+}
+// ============================
+// SELLER
+// ============================
+
+async function changeSellerRole(userId, role, username) {
+
+  const isSeller = role === "seller";
+
+  const action = isSeller
+    ? "hạ tài khoản này về User"
+    : "nâng tài khoản này thành Seller";
+
+  if (!confirm(
+    `Bạn có chắc muốn ${action}?\n\n` +
+    `Tài khoản: ${username}`
+  )) {
+    return;
+  }
+  // ============================
+// SELLER DISCOUNT
+// ============================
+
+async function changeSellerDiscount(userId, username, currentDiscount) {
+
+  const input = prompt(
+    `Nhập % giảm giá cho Seller "${username}":\n\n` +
+    `Mức hiện tại: ${currentDiscount}%\n` +
+    `Cho phép từ 0% đến 90%.`,
+    currentDiscount
+  );
+
+  if (input === null) {
+    return;
+  }
+
+  const discount = Number(input);
+
+  if (
+    !Number.isFinite(discount) ||
+    discount < 0 ||
+    discount > 90
+  ) {
+    alert("Mức giảm phải từ 0% đến 90%.");
+    return;
+  }
+
+  try {
+
+    await API.put(
+      `/admin/users/${userId}/seller-discount`,
+      {
+        discount_percent: discount
+      }
+    );
+
+    alert(
+      `Đã cập nhật giảm giá cho ${username}: ${discount}%`
+    );
+
+    await loadUsers();
+
+  } catch (error) {
+
+    alert(error.message);
+  }
 }
 
+  try {
+
+    await API.put(
+      `/admin/users/${userId}/role`,
+      {
+        role: isSeller ? "user" : "seller"
+      }
+    );
+
+    alert(
+      isSeller
+        ? `Đã hạ ${username} về User.`
+        : `Đã nâng ${username} thành Seller.`
+    );
+
+    await loadUsers();
+
+  } catch (error) {
+
+    alert(error.message);
+  }
+}
 
 // ============================
 // BALANCE
