@@ -2984,3 +2984,107 @@ footer {
   width: 100%;
   text-align: center;
 }
+/* ================================
+   PROXY FOLDER
+================================ */
+
+.proxy-folder {
+  width: 100%;
+  margin: 28px 0;
+  box-sizing: border-box;
+
+  background: #ffffff;
+  border: 3px solid #166534;
+  box-shadow: 6px 6px 0 #166534;
+}
+
+.proxy-folder-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  padding: 18px 20px;
+
+  background: #dcfce7;
+}
+
+.proxy-folder-icon {
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  background: #22c55e;
+  border: 2px solid #166534;
+  box-shadow: 3px 3px 0 #166534;
+
+  font-size: 26px;
+}
+
+.proxy-folder-info {
+  flex: 1;
+}
+
+.proxy-folder-title {
+  color: #166534;
+
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.proxy-folder-subtitle {
+  margin-top: 4px;
+
+  color: #475569;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.proxy-folder-button {
+  padding: 11px 16px;
+
+  border: 2px solid #166534;
+  background: #22c55e;
+  color: #ffffff;
+
+  box-shadow: 3px 3px 0 #166534;
+
+  font-size: 13px;
+  font-weight: 900;
+
+  cursor: pointer;
+}
+
+.proxy-folder-button:hover {
+  background: #16a34a;
+}
+
+.proxy-folder-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #166534;
+}
+
+.proxy-back-button {
+  display: block;
+
+  margin: 0 0 20px;
+
+  padding: 10px 16px;
+
+  border: 2px solid #166534;
+  background: #dcfce7;
+  color: #166534;
+
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.proxy-back-button:hover {
+  background: #bbf7d0;
+}
