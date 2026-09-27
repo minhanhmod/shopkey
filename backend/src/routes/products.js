@@ -696,6 +696,74 @@ router.delete(
     }
   }
 );
+// =====================================================
+// GET ACTIVE FOLDERS
+// Public
+// =====================================================
 
+router.get("/folders/list", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        pf.id,
+        pf.name,
+        pf.button_text,
+        pf.description,
+        pf.image_url,
+        pf.sort_order,
+        pf.is_active,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', p.id,
+              'name', p.name,
+              'slug', p.slug,
+              'description', p.description,
+              'image_url', p.image_url,
+              'category', p.category,
+              'price', p.price,
+              'stock', p.stock,
+              'is_active', p.is_active
+            )
+            ORDER BY pfi.sort_order ASC, p.id ASC
+          ) FILTER (WHERE p.id IS NOT NULL),
+          '[]'::json
+        ) AS products
+      FROM product_folders pf
+      LEFT JOIN product_folder_items pfi
+        ON pfi.folder_id = pf.id
+      LEFT JOIN products p
+        ON p.id = pfi.product_id
+       AND p.is_active = true
+      WHERE pf.is_active = true
+      GROUP BY
+        pf.id,
+        pf.name,
+        pf.button_text,
+        pf.description,
+        pf.image_url,
+        pf.sort_order,
+        pf.is_active
+      ORDER BY
+        pf.sort_order ASC,
+        pf.id ASC
+    `);
+
+    return res.json({
+      folders: result.rows
+    });
+
+  } catch (error) {
+
+    console.error(
+      "GET FOLDERS ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      message: "Không thể lấy danh sách Folder"
+    });
+  }
+});
 
 export default router;
