@@ -2564,3 +2564,116 @@ footer {
     width: min(285px, calc(100vw - 30px));
   }
 }
+/* TOP UP */
+
+.topup-section {
+  margin-top: 30px;
+}
+
+.topup-box {
+  max-width: 600px;
+}
+
+.topup-box label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.topup-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topup-input input {
+  flex: 1;
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 16px;
+  outline: none;
+}
+
+.topup-input input:focus {
+  border-color: var(--neon);
+}
+
+.topup-input span {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.topup-quick {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 15px 0;
+}
+
+.topup-quick-btn {
+  min-width: 70px;
+}
+
+.topup-button {
+  width: 100%;
+  margin-top: 5px;
+}
+
+.topup-result {
+  margin-top: 20px;
+}
+
+.topup-payment {
+  padding: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.topup-payment h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.topup-payment p {
+  margin: 10px 0;
+}
+
+.topup-payment .btn {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.topup-note {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.topup-error {
+  padding: 15px;
+  border: 1px solid #ff5555;
+  color: #ff7777;
+}
+
+@media (max-width: 600px) {
+  .topup-input {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topup-input span {
+    display: none;
+  }
+
+  .topup-quick {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .topup-quick-btn {
+    width: 100%;
+  }
+}
