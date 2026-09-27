@@ -127,9 +127,10 @@ router.post("/login", async (req, res) => {
         email,
         password_hash,
         role,
-        balance,
-        is_active,
-        created_at
+balance,
+seller_discount_percent,
+is_active,
+created_at
       FROM users
       WHERE LOWER(username) = LOWER($1)
          OR LOWER(email) = LOWER($1)
@@ -195,10 +196,11 @@ router.get("/me", requireAuth, async (req, res) => {
         id,
         username,
         email,
-        role,
-        balance,
-        is_active,
-        created_at
+       role,
+balance,
+seller_discount_percent,
+is_active,
+created_at
       FROM users
       WHERE id = $1
       LIMIT 1
