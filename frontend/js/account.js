@@ -487,7 +487,6 @@ if (topupButton) {
           </div>
         `;
       }
-
       return;
     }
 
@@ -499,7 +498,6 @@ if (topupButton) {
           </div>
         `;
       }
-
       return;
     }
 
@@ -518,6 +516,7 @@ if (topupButton) {
       if (topupPaymentInfo) {
         topupPaymentInfo.innerHTML = `
           <div class="topup-payment">
+
             <h3>Thanh toán đang chờ</h3>
 
             <p>
@@ -530,9 +529,36 @@ if (topupButton) {
               <strong>${formatMoney(data.amount)}</strong>
             </p>
 
-            <p>
+            <!-- QR -->
+            <div class="topup-qr-title">
+              QUÉT QR ĐỂ THANH TOÁN
+            </div>
+
+            <div id="topupQrInside" class="topup-qr-frame"></div>
+
+            <!-- Thông tin tài khoản -->
+            <div class="topup-bank-info">
+
+              <div>
+                <span>Số Tài Khoản</span>
+                <strong>023456987</strong>
+              </div>
+
+              <div>
+                <span>Ngân Hàng</span>
+                <strong>MB BANK</strong>
+              </div>
+
+              <div>
+                <span>Tên Tài Khoản</span>
+                <strong>Nguyen Thanh Hai</strong>
+              </div>
+
+            </div>
+
+            <p class="topup-transfer-content">
               Nội dung chuyển khoản:
-              <strong>NAP ${escapeHtml(data.orderCode)}</strong>
+              <strong>MAM ${escapeHtml(data.orderCode)}</strong>
             </p>
 
             <a
@@ -545,28 +571,33 @@ if (topupButton) {
             </a>
 
             <p class="topup-note">
-              Quét mã QR để thanh toán.
+              Quét mã QR bằng ứng dụng ngân hàng để thanh toán.
             </p>
+
           </div>
         `;
       }
 
+      // Tạo QR ngay bên dưới số tiền
+      const topupQrInside =
+        document.getElementById("topupQrInside");
+
+      if (topupQrInside && data.qrCode && typeof QRCode !== "undefined") {
+        topupQrInside.innerHTML = "";
+
+        new QRCode(topupQrInside, {
+          text: data.qrCode,
+          width: 280,
+          height: 280,
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+
+      // Ẩn QR box cũ nếu còn trong HTML
       if (topupQrBox) {
         topupQrBox.innerHTML = "";
-
-        if (data.qrCode && typeof QRCode !== "undefined") {
-          topupQrBox.hidden = false;
-          topupQrBox.style.display = "flex";
-          topupQrBox.style.justifyContent = "center";
-          topupQrBox.style.marginTop = "20px";
-
-          new QRCode(topupQrBox, {
-            text: data.qrCode,
-            width: 280,
-            height: 280,
-            correctLevel: QRCode.CorrectLevel.M
-          });
-        }
+        topupQrBox.hidden = true;
+        topupQrBox.style.display = "none";
       }
 
     } catch (error) {
