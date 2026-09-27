@@ -722,7 +722,7 @@ result.innerHTML = `
 
 if (data.qrCode && qrBox) {
   qrBox.hidden = false;
-
+  qrBox.style.display = "block";
   qrBox.innerHTML = "";
 
   new QRCode(qrBox, {
