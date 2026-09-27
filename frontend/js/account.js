@@ -721,19 +721,17 @@ result.innerHTML = `
   </div>
 `;
 
-if (data.qrCode && qrImage && qrBox) {
+if (data.qrCode && qrBox) {
   qrBox.hidden = false;
 
-  QRCode.toDataURL(data.qrCode, {
+  qrBox.innerHTML = "";
+
+  new QRCode(qrBox, {
+    text: data.qrCode,
     width: 280,
-    margin: 2
-  })
-    .then((url) => {
-      qrImage.src = url;
-    })
-    .catch((error) => {
-      console.error("Không tạo được QR:", error);
-    });
+    height: 280,
+    correctLevel: QRCode.CorrectLevel.M
+  });
 }
 
     } catch (error) {
