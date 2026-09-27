@@ -180,7 +180,131 @@
 
   </section>
 
+<!-- ========================= -->
+<!-- PRODUCT FOLDERS -->
+<!-- ========================= -->
 
+<section class="admin-panel">
+
+  <div class="admin-panel-header">
+
+    <div>
+      <div class="section-kicker">FOLDERS</div>
+      <h2>Quản lý Folder</h2>
+    </div>
+
+    <button
+      id="newFolderButton"
+      class="btn btn-primary"
+      type="button"
+    >
+      + THÊM FOLDER
+    </button>
+
+  </div>
+
+  <div id="foldersAdminList">
+
+    <div class="table-loading">
+      Đang tải folder...
+    </div>
+
+  </div>
+
+</section>
+  <div
+  id="folderForm"
+  class="admin-form"
+  style="display: none;"
+>
+
+  <div class="admin-form-title">
+    Tạo / sửa Folder
+  </div>
+
+  <input
+    type="hidden"
+    id="folderId"
+  >
+
+  <label>
+    Tên Folder
+    <input
+      type="text"
+      id="folderName"
+      maxlength="100"
+      placeholder="Ví dụ: PROXY"
+    >
+  </label>
+
+  <label>
+    Tên nút
+    <input
+      type="text"
+      id="folderButtonText"
+      maxlength="100"
+      placeholder="Ví dụ: XEM PROXY"
+    >
+  </label>
+
+  <label>
+    Mô tả
+    <textarea
+      id="folderDescription"
+      rows="3"
+      placeholder="Mô tả folder..."
+    ></textarea>
+  </label>
+
+  <label>
+    Ảnh Folder
+    <input
+      type="text"
+      id="folderImageUrl"
+      placeholder="URL ảnh, ví dụ: images/proxy.jpg"
+    >
+  </label>
+
+  <label>
+    Thứ tự
+    <input
+      type="number"
+      id="folderSortOrder"
+      value="0"
+    >
+  </label>
+
+  <label class="admin-checkbox">
+    <input
+      type="checkbox"
+      id="folderIsActive"
+      checked
+    >
+    Hiển thị Folder
+  </label>
+
+  <div class="admin-form-actions">
+
+    <button
+      type="button"
+      id="saveFolderButton"
+      class="btn btn-primary"
+    >
+      LƯU FOLDER
+    </button>
+
+    <button
+      type="button"
+      id="cancelFolderButton"
+      class="btn btn-secondary"
+    >
+      HỦY
+    </button>
+
+  </div>
+
+</div>
+  
   <!-- ========================= -->
   <!-- ORDERS -->
   <!-- ========================= -->
