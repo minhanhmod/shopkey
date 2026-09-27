@@ -1236,7 +1236,7 @@ footer {
 
 /* PROFILE */
 
-.profile-card {
+.account-profile-card {
   background: var(--card);
 
   border: 1px solid var(--border);
@@ -1248,7 +1248,7 @@ footer {
   top: 100px;
 }
 
-.profile-card h2 {
+.account-profile-card h2 {
   margin: 12px 0 25px;
 
   font-size: 24px;
@@ -1334,9 +1334,9 @@ footer {
     grid-template-columns: 1fr;
   }
 
-  .profile-card {
-    position: static;
-  }
+.account-profile-card {
+  position: static;
+}
 
 }
 
