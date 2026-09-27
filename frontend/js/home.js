@@ -296,7 +296,117 @@ function renderProducts(list) {
 
     }).join("");
 
+document
+  .querySelectorAll(".quantity-minus")
+  .forEach(button => {
 
+    button.addEventListener("click", () => {
+
+      const productId =
+        Number(button.dataset.productId);
+
+      const valueElement =
+        document.querySelector(
+          `.quantity-value[data-product-id="${productId}"]`
+        );
+
+      const totalElement =
+        document.querySelector(
+          `.quantity-total[data-product-id="${productId}"]`
+        );
+
+      const product =
+        products.find(
+          item =>
+            Number(item.id) === productId
+        );
+
+      if (
+        !valueElement ||
+        !totalElement ||
+        !product
+      ) {
+        return;
+      }
+
+      let quantity =
+        Number(valueElement.textContent);
+
+      quantity =
+        Math.max(1, quantity - 1);
+
+      valueElement.textContent =
+        quantity;
+
+      const price =
+        getProductPrice(product);
+
+      totalElement.textContent =
+        `Tổng: ${formatMoney(
+          price * quantity
+        )}`;
+
+    });
+
+  });
+
+
+document
+  .querySelectorAll(".quantity-plus")
+  .forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      const productId =
+        Number(button.dataset.productId);
+
+      const valueElement =
+        document.querySelector(
+          `.quantity-value[data-product-id="${productId}"]`
+        );
+
+      const totalElement =
+        document.querySelector(
+          `.quantity-total[data-product-id="${productId}"]`
+        );
+
+      const product =
+        products.find(
+          item =>
+            Number(item.id) === productId
+        );
+
+      if (
+        !valueElement ||
+        !totalElement ||
+        !product
+      ) {
+        return;
+      }
+
+      let quantity =
+        Number(valueElement.textContent);
+
+      const stock =
+        Number(product.stock || 0);
+
+      quantity =
+        Math.min(stock, quantity + 1);
+
+      valueElement.textContent =
+        quantity;
+
+      const price =
+        getProductPrice(product);
+
+      totalElement.textContent =
+        `Tổng: ${formatMoney(
+          price * quantity
+        )}`;
+
+    });
+
+  });
   document
     .querySelectorAll(".buy-button")
     .forEach(button => {
