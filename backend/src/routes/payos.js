@@ -10,6 +10,12 @@ const router = express.Router();
  * PayOS gọi endpoint này khi giao dịch thay đổi trạng thái.
  */
 router.post("/webhook", async (req, res) => {
+console.log("PAYOS WEBHOOK RECEIVED");
+console.log("BODY:", JSON.stringify(req.body));
+console.log("HEADERS:", {
+  "content-type": req.headers["content-type"],
+  "user-agent": req.headers["user-agent"]
+});
   const client = await pool.connect();
 
   try {
