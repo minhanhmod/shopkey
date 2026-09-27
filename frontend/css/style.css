@@ -2950,3 +2950,37 @@ footer {
   font-size: 13px;
   font-weight: 700;
 }
+/* ================================
+   PRODUCT PURCHASE AREA
+================================ */
+
+.product-purchase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.product-purchase .quantity-box {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.product-price-area {
+  width: 100%;
+  text-align: center;
+}
+
+.product-price-area .product-stock {
+  text-align: center;
+}
+
+.product-purchase .buy-button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.product-purchase .quantity-total {
+  width: 100%;
+  text-align: center;
+}
