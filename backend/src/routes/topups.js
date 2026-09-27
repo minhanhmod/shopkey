@@ -61,7 +61,7 @@ router.post("/", requireAuth, async (req, res) => {
     const paymentLink = await payos.paymentRequests.create({
       orderCode,
       amount,
-      description: `NAP PIXELKEY ${orderCode}`,
+      description: "NAP TIEN MINHANHMOD",
       cancelUrl: `${frontendUrl}/account.html?payment=cancel`,
       returnUrl: `${frontendUrl}/account.html?payment=success`,
       expiredAt: Math.floor(Date.now() / 1000) + 15 * 60
