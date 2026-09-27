@@ -599,7 +599,14 @@ clearInterval(topupPollTimer);
           correctLevel: QRCode.CorrectLevel.M
         });
       }
+clearInterval(topupPollTimer);
 
+checkTopupStatus();
+
+topupPollTimer = setInterval(
+  checkTopupStatus,
+  3000
+);
       // Ẩn QR box cũ nếu còn trong HTML
       if (topupQrBox) {
         topupQrBox.innerHTML = "";
@@ -628,5 +635,89 @@ clearInterval(topupPollTimer);
     }
   });
 }
+async function checkTopupStatus() {
+  if (!currentTopupOrderCode) return;
 
+  try {
+    const data = await API.get(
+      `/topups/${currentTopupOrderCode}`
+    );
+
+    const status =
+      String(data.status || "").toLowerCase();
+
+    if (status === "paid") {
+      clearInterval(topupPollTimer);
+
+      if (topupPaymentInfo) {
+        topupPaymentInfo.innerHTML = `
+          <div class="topup-success-card">
+
+            <div class="topup-success-icon">
+              ✓
+            </div>
+
+            <div class="topup-success-title">
+              THANH TOÁN THÀNH CÔNG
+            </div>
+
+            <div class="topup-success-subtitle">
+              Nạp tiền vào tài khoản thành công
+            </div>
+
+            <div class="topup-success-info">
+
+              <div>
+                <span>Mã đơn</span>
+                <strong>
+                  ${escapeHtml(currentTopupOrderCode)}
+                </strong>
+              </div>
+
+              <div>
+                <span>Số tiền</span>
+                <strong>
+                  ${formatMoney(currentTopupAmount)}
+                </strong>
+              </div>
+
+            </div>
+
+            <div class="topup-success-note">
+              ✓ Số dư của bạn đã được cập nhật.
+            </div>
+
+          </div>
+        `;
+      }
+
+      showTopupMessage(
+        "Nạp tiền thành công! Số dư của bạn đã được cộng.",
+        "success"
+      );
+
+      await loadAccount();
+
+      return;
+    }
+
+    if (
+      status === "cancelled" ||
+      status === "expired"
+    ) {
+      clearInterval(topupPollTimer);
+
+      showTopupMessage(
+        "Đơn nạp tiền đã hết hạn hoặc bị hủy.",
+        "error"
+      );
+    }
+
+  } catch (error) {
+    console.error(
+      "Topup status error:",
+      error
+    );
+  }
+}
 initAccount();
