@@ -10,16 +10,21 @@ const router = express.Router();
  * PayOS gọi endpoint này khi giao dịch thay đổi trạng thái.
  */
 router.post("/webhook", async (req, res) => {
-console.log("PAYOS WEBHOOK RECEIVED");
-console.log("BODY:", JSON.stringify(req.body));
-console.log("HEADERS:", {
-  "content-type": req.headers["content-type"],
-  "user-agent": req.headers["user-agent"]
-});
+  console.log("PAYOS WEBHOOK RECEIVED");
+
+  console.log("BODY:", JSON.stringify(req.body));
+
+  console.log("HEADERS:", {
+    "content-type": req.headers["content-type"],
+    "user-agent": req.headers["user-agent"]
+  });
+
   const client = await pool.connect();
 
   try {
-    // Xác thực webhook từ PayOS
+    /*
+     * Xác thực webhook từ PayOS.
+     */
     const webhookData = await payos.webhooks.verify(req.body);
 
     const orderCode = Number(webhookData.orderCode);
@@ -33,7 +38,9 @@ console.log("HEADERS:", {
 
     await client.query("BEGIN");
 
-    // Khóa đơn nạp tiền để tránh cộng tiền 2 lần
+    /*
+     * Khóa đơn nạp tiền để tránh cộng tiền 2 lần.
+     */
     const topupResult = await client.query(
       `
       SELECT *
@@ -54,7 +61,10 @@ console.log("HEADERS:", {
 
     const topup = topupResult.rows[0];
 
-    // Nếu đã thanh toán trước đó thì không cộng tiền lần nữa
+    /*
+     * Nếu đã thanh toán trước đó,
+     * không cộng tiền lần nữa.
+     */
     if (topup.status === "paid") {
       await client.query("COMMIT");
 
@@ -63,7 +73,9 @@ console.log("HEADERS:", {
       });
     }
 
-    // Kiểm tra số tiền
+    /*
+     * Kiểm tra số tiền.
+     */
     if (Number(topup.amount) !== amount) {
       await client.query("ROLLBACK");
 
@@ -78,7 +90,9 @@ console.log("HEADERS:", {
       });
     }
 
-    // Khóa user
+    /*
+     * Khóa user.
+     */
     const userResult = await client.query(
       `
       SELECT id, balance
@@ -97,7 +111,9 @@ console.log("HEADERS:", {
       });
     }
 
-    // Cộng tiền
+    /*
+     * Cộng tiền vào tài khoản.
+     */
     await client.query(
       `
       UPDATE users
@@ -109,7 +125,9 @@ console.log("HEADERS:", {
       [topup.amount, topup.user_id]
     );
 
-    // Đánh dấu đơn đã thanh toán
+    /*
+     * Đánh dấu đơn nạp tiền đã thanh toán.
+     */
     await client.query(
       `
       UPDATE topup_orders
@@ -131,47 +149,64 @@ console.log("HEADERS:", {
     return res.json({
       message: "Thanh toán đã được xử lý"
     });
- } catch (error) {
-  await client.query("ROLLBACK");
 
-  console.error("PAYOS WEBHOOK VERIFY ERROR:", {
-    name: error.name,
-    message: error.message
-  });
-
-  return res.status(500).json({
-    message: "Webhook xử lý thất bại"
-  }
-  });
-  
-/*
- * Xem trạng thái thanh toán từ PayOS
- */
-router.get("/payment/:orderCode", requireAuth, async (req, res) => {
-  try {
-    const orderCode = Number(req.params.orderCode);
-
-    if (!orderCode) {
-      return res.status(400).json({
-        message: "Order code không hợp lệ"
-      });
+  } catch (error) {
+    /*
+     * Nếu giao dịch database đang mở thì rollback.
+     */
+    try {
+      await client.query("ROLLBACK");
+    } catch {
+      // Không làm gì nếu transaction chưa được mở.
     }
 
-    const result = await payos.paymentRequests.get(orderCode);
-
-    res.json(result);
-  } catch (error) {
-    console.error("Get PayOS payment error:", error);
-
-    res.status(500).json({
-      message: "Không thể lấy trạng thái thanh toán"
+    console.error("PAYOS WEBHOOK VERIFY ERROR:", {
+      name: error.name,
+      message: error.message
     });
+
+    return res.status(500).json({
+      message: "Webhook xử lý thất bại"
+    });
+  } finally {
+    client.release();
   }
 });
 
 
 /*
- * Xác nhận webhook URL với PayOS
+ * Xem trạng thái thanh toán từ PayOS.
+ */
+router.get(
+  "/payment/:orderCode",
+  requireAuth,
+  async (req, res) => {
+    try {
+      const orderCode = Number(req.params.orderCode);
+
+      if (!orderCode) {
+        return res.status(400).json({
+          message: "Order code không hợp lệ"
+        });
+      }
+
+      const result = await payos.paymentRequests.get(orderCode);
+
+      return res.json(result);
+
+    } catch (error) {
+      console.error("Get PayOS payment error:", error);
+
+      return res.status(500).json({
+        message: "Không thể lấy trạng thái thanh toán"
+      });
+    }
+  }
+);
+
+
+/*
+ * Xác nhận webhook URL với PayOS.
  * Chỉ admin được sử dụng.
  */
 router.post(
@@ -190,19 +225,21 @@ router.post(
 
       const result = await payos.webhooks.confirm(webhookUrl);
 
-      res.json({
+      return res.json({
         message: "Webhook PayOS đã được cấu hình",
         result
       });
+
     } catch (error) {
       console.error("Setup PayOS webhook error:", error);
 
-      res.status(500).json({
+      return res.status(500).json({
         message: "Không thể cấu hình webhook PayOS",
         error: error.message
       });
     }
   }
 );
+
 
 export default router;
