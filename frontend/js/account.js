@@ -656,22 +656,45 @@ if (createTopup) {
 
 document.querySelectorAll(".topup-quick-btn").forEach((button) => {
   button.addEventListener("click", () => {
-    const amount = button.dataset.amount;
-    document.getElementById("topupAmount").value = amount;
+    const amountInput = document.getElementById("topupAmount");
+
+    if (amountInput) {
+      amountInput.value = button.dataset.amount;
+    }
   });
 });
 
 const topupButton = document.getElementById("topupButton");
+const topupResultBox = document.getElementById("topupResult");
+const topupPaymentInfo = document.getElementById("topupPaymentInfo");
+const topupQrBox = document.getElementById("topupQrBox");
 
 if (topupButton) {
   topupButton.addEventListener("click", async () => {
     const amountInput = document.getElementById("topupAmount");
-    const result = document.getElementById("topupResult");
-
-    const amount = Number(amountInput.value);
+    const amount = Number(amountInput?.value);
 
     if (!amount || amount < 10000) {
-      result.innerHTML = "⚠️ Số tiền nạp tối thiểu là 10.000đ.";
+      if (topupPaymentInfo) {
+        topupPaymentInfo.innerHTML = `
+          <div class="topup-error">
+            ⚠️ Số tiền nạp tối thiểu là 10.000đ.
+          </div>
+        `;
+      }
+
+      return;
+    }
+
+    if (amount > 50000000) {
+      if (topupPaymentInfo) {
+        topupPaymentInfo.innerHTML = `
+          <div class="topup-error">
+            ⚠️ Số tiền nạp tối đa là 50.000.000đ.
+          </div>
+        `;
+      }
+
       return;
     }
 
@@ -683,66 +706,84 @@ if (topupButton) {
         amount
       });
 
-const qrBox = document.getElementById("topupQrBox");
+      if (topupResultBox) {
+        topupResultBox.hidden = false;
+      }
 
-result.innerHTML = `
-  <div class="topup-payment">
+      if (topupPaymentInfo) {
+        topupPaymentInfo.innerHTML = `
+          <div class="topup-payment">
+            <h3>Thanh toán đang chờ</h3>
 
-    <h3>Thanh toán đang chờ</h3>
+            <p>
+              Mã đơn:
+              <strong>${escapeHtml(data.orderCode)}</strong>
+            </p>
 
-    <p>
-      Mã đơn:
-      <strong>${data.orderCode}</strong>
-    </p>
+            <p>
+              Số tiền:
+              <strong>${formatMoney(data.amount)}</strong>
+            </p>
 
-    <p>
-      Số tiền:
-      <strong>${formatMoney(data.amount)}</strong>
-    </p>
+            <p>
+              Nội dung chuyển khoản:
+              <strong>NAP ${escapeHtml(data.orderCode)}</strong>
+            </p>
 
-    <p>
-      Nội dung chuyển khoản:
-      <strong>NAP ${data.orderCode}</strong>
-    </p>
+            <a
+              href="${data.checkoutUrl}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-primary"
+            >
+              Mở trang thanh toán PayOS
+            </a>
 
-    <a
-      href="${data.checkoutUrl}"
-      target="_blank"
-      class="btn btn-primary"
-    >
-      Mở trang thanh toán PayOS
-    </a>
+            <p class="topup-note">
+              Quét mã QR hoặc mở trang PayOS để thanh toán.
+            </p>
+          </div>
+        `;
+      }
 
-    <p class="topup-note">
-      Quét mã QR hoặc mở trang PayOS để thanh toán.
-    </p>
+      if (topupQrBox) {
+        topupQrBox.innerHTML = "";
 
-  </div>
-`;
+        if (data.qrCode && typeof QRCode !== "undefined") {
+          topupQrBox.hidden = false;
+          topupQrBox.style.display = "flex";
+          topupQrBox.style.justifyContent = "center";
+          topupQrBox.style.marginTop = "20px";
 
-if (data.qrCode && qrBox) {
-  qrBox.hidden = false;
-  qrBox.style.display = "block";
-  qrBox.innerHTML = "";
-
-  new QRCode(qrBox, {
-    text: data.qrCode,
-    width: 280,
-    height: 280,
-    correctLevel: QRCode.CorrectLevel.M
-  });
-}
+          new QRCode(topupQrBox, {
+            text: data.qrCode,
+            width: 280,
+            height: 280,
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        }
+      }
 
     } catch (error) {
-      result.innerHTML = `
-        <div class="topup-error">
-          ❌ ${escapeHtml(error.message)}
-        </div>
-      `;
+      console.error(error);
+
+      if (topupResultBox) {
+        topupResultBox.hidden = false;
+      }
+
+      if (topupPaymentInfo) {
+        topupPaymentInfo.innerHTML = `
+          <div class="topup-error">
+            ❌ ${escapeHtml(error.message)}
+          </div>
+        `;
+      }
+
     } finally {
       topupButton.disabled = false;
       topupButton.textContent = "💳 Nạp tiền qua PayOS";
     }
   });
 }
+
 initAccount();
