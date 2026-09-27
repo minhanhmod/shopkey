@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function updateNavigation() {
   const navActions = document.getElementById("navActions");
-
   if (!navActions) return;
 
   const token = localStorage.getItem("pixelkey_token");
@@ -21,11 +20,9 @@ function updateNavigation() {
         Đăng ký
       </a>
     `;
-
     return;
   }
 
-  // Đã đăng nhập
   let user;
 
   try {
@@ -50,8 +47,17 @@ function updateNavigation() {
   const username = user.username || "Người chơi";
 
   navActions.innerHTML = `
-    <a href="./account.html" class="btn btn-primary profile-button">
-      👤 ${escapeHtml(username)}
+    <a href="./account.html" class="profile-card">
+      <span class="profile-avatar">
+        <span class="profile-avatar-pixel">◆</span>
+      </span>
+
+      <span class="profile-info">
+        <span class="profile-username">${escapeHtml(username)}</span>
+        <span class="profile-role">PLAYER</span>
+      </span>
+
+      <span class="profile-arrow">›</span>
     </a>
   `;
 }
