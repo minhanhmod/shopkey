@@ -650,5 +650,77 @@ if (createTopup) {
     createTopupOrder
   );
 }
+// =========================
+// TOP UP
+// =========================
 
+document.querySelectorAll(".topup-quick-btn").forEach((button) => {
+  button.addEventListener("click", () => {
+    const amount = button.dataset.amount;
+    document.getElementById("topupAmount").value = amount;
+  });
+});
+
+const topupButton = document.getElementById("topupButton");
+
+if (topupButton) {
+  topupButton.addEventListener("click", async () => {
+    const amountInput = document.getElementById("topupAmount");
+    const result = document.getElementById("topupResult");
+
+    const amount = Number(amountInput.value);
+
+    if (!amount || amount < 10000) {
+      result.innerHTML = "⚠️ Số tiền nạp tối thiểu là 10.000đ.";
+      return;
+    }
+
+    try {
+      topupButton.disabled = true;
+      topupButton.textContent = "Đang tạo thanh toán...";
+
+      const data = await API.post("/topups", {
+        amount
+      });
+
+      result.innerHTML = `
+        <div class="topup-payment">
+          <h3>Thanh toán đang chờ</h3>
+
+          <p>
+            Mã đơn:
+            <strong>${data.orderCode}</strong>
+          </p>
+
+          <p>
+            Số tiền:
+            <strong>${formatMoney(data.amount)}</strong>
+          </p>
+
+          <a
+            href="${data.checkoutUrl}"
+            target="_blank"
+            class="btn btn-primary"
+          >
+            Mở trang thanh toán PayOS
+          </a>
+
+          <p class="topup-note">
+            Sau khi thanh toán thành công, số dư sẽ được cập nhật.
+          </p>
+        </div>
+      `;
+
+    } catch (error) {
+      result.innerHTML = `
+        <div class="topup-error">
+          ❌ ${escapeHtml(error.message)}
+        </div>
+      `;
+    } finally {
+      topupButton.disabled = false;
+      topupButton.textContent = "💳 Nạp tiền qua PayOS";
+    }
+  });
+}
 initAccount();
