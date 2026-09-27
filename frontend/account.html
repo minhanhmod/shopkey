@@ -151,58 +151,137 @@
       </div>
 
 
-      <!-- PROFILE -->
+<!-- PROFILE -->
 
-      <aside class="profile-card">
+<aside class="account-profile-card">
 
+  <div class="section-label">
+    PROFILE
+  </div>
+
+  <h2>Thông tin tài khoản</h2>
+
+  <div class="profile-row">
+    <span>Username</span>
+    <strong id="profileUsername">...</strong>
+  </div>
+
+  <div class="profile-row">
+    <span>Email</span>
+    <strong id="profileEmail">...</strong>
+  </div>
+
+  <div class="profile-row">
+    <span>ID tài khoản</span>
+    <strong id="profileId">...</strong>
+  </div>
+
+
+  <!-- TOP UP -->
+
+  <div id="topup" class="topup-box">
+
+    <div class="topup-heading">
+      <div class="topup-icon">₫</div>
+
+      <div>
         <div class="section-label">
-          PROFILE
+          WALLET
         </div>
 
-        <h2>Thông tin tài khoản</h2>
+        <h3>Nạp tiền</h3>
+      </div>
+    </div>
 
+    <p class="topup-description">
+      Nạp tiền vào số dư để mua game key nhanh hơn.
+    </p>
 
-        <div class="profile-row">
+    <label for="topupAmount">
+      SỐ TIỀN NẠP
+    </label>
 
-          <span>Username</span>
+    <input
+      id="topupAmount"
+      type="number"
+      min="10000"
+      step="1000"
+      placeholder="Ví dụ: 100000"
+    >
 
-          <strong id="profileUsername">
-            ...
-          </strong>
+    <div class="topup-quick">
+      <button type="button" data-topup="50000">50K</button>
+      <button type="button" data-topup="100000">100K</button>
+      <button type="button" data-topup="200000">200K</button>
+      <button type="button" data-topup="500000">500K</button>
+    </div>
 
-        </div>
+    <button
+      type="button"
+      id="createTopup"
+      class="btn btn-primary topup-button"
+    >
+      💳 Nạp tiền qua PayOS
+    </button>
 
+    <div
+      id="topupMessage"
+      class="topup-message"
+    ></div>
 
-        <div class="profile-row">
+    <div
+      id="topupResult"
+      class="topup-result"
+      hidden
+    >
 
-          <span>Email</span>
+      <div class="topup-qr-box">
+        <canvas id="topupQr"></canvas>
+      </div>
 
-          <strong id="profileEmail">
-            ...
-          </strong>
+      <div class="topup-result-info">
 
-        </div>
+        <span>ĐƠN NẠP</span>
 
+        <strong id="topupOrderCode">
+          ---
+        </strong>
 
-        <div class="profile-row">
+        <span>SỐ TIỀN</span>
 
-          <span>ID tài khoản</span>
+        <strong id="topupOrderAmount">
+          ---
+        </strong>
 
-          <strong id="profileId">
-            ...
-          </strong>
-
-        </div>
-
+        <span id="topupStatus">
+          ĐANG CHỜ THANH TOÁN...
+        </span>
 
         <a
-          href="./index.html"
-          class="btn btn-primary profile-button"
+          id="topupCheckout"
+          href="#"
+          target="_blank"
+          rel="noopener"
+          class="btn btn-outline topup-checkout"
         >
-          🎮 Tiếp tục mua game
+          Mở trang PayOS
         </a>
 
-      </aside>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <a
+    href="./index.html"
+    class="btn btn-primary profile-button"
+  >
+    🎮 Tiếp tục mua game
+  </a>
+
+</aside>
 
     </section>
 
