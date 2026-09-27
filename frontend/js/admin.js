@@ -908,6 +908,185 @@ function bindFolderButtons() {
     });
 
 }
+async function openFolderProducts(folderId) {
+  const modal =
+    document.getElementById("folderProductsModal");
+
+  const list =
+    document.getElementById("folderProductsList");
+
+  const title =
+    document.getElementById("folderProductsTitle");
+
+  if (!modal || !list) {
+    return;
+  }
+
+  currentFolderId = folderId;
+
+  const folder = folders.find(
+    item => Number(item.id) === Number(folderId)
+  );
+
+  if (!folder) {
+    return;
+  }
+
+  title.textContent =
+    `Folder: ${folder.name}`;
+
+  list.innerHTML =
+    "Đang tải sản phẩm...";
+
+  modal.style.display = "block";
+
+  try {
+
+    const result =
+      await API.get(
+        `/admin/folders/${folderId}/products`
+      );
+
+    const selectedIds =
+      new Set(
+        (result.products || []).map(
+          product => Number(product.id)
+        )
+      );
+
+    if (!products.length) {
+      await loadProducts();
+    }
+
+    if (!products.length) {
+      list.innerHTML =
+        "<p>Chưa có sản phẩm nào.</p>";
+      return;
+    }
+
+    list.innerHTML =
+      products.map(product => {
+
+        const checked =
+          selectedIds.has(
+            Number(product.id)
+          )
+            ? "checked"
+            : "";
+
+        return `
+          <label
+            style="
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              padding: 10px;
+              margin-bottom: 8px;
+              border: 1px solid #374151;
+              cursor: pointer;
+            "
+          >
+
+            <input
+              type="checkbox"
+              class="folder-product-checkbox"
+              value="${product.id}"
+              ${checked}
+            >
+
+            <span>
+              <strong>
+                #${product.id}
+              </strong>
+              -
+              ${escapeHtml(product.name)}
+
+              <small>
+                (${Number(product.price).toLocaleString("vi-VN")}đ)
+              </small>
+            </span>
+
+          </label>
+        `;
+
+      }).join("");
+
+  } catch (error) {
+
+    console.error(
+      "OPEN FOLDER PRODUCTS ERROR:",
+      error
+    );
+
+    list.innerHTML =
+      `<p>Không thể tải sản phẩm: ${
+        escapeHtml(
+          error.message || "Lỗi không xác định"
+        )
+      }</p>`;
+  }
+}
+
+
+async function saveFolderProducts() {
+
+  if (!currentFolderId) {
+    return;
+  }
+
+  const selected =
+    Array.from(
+      document.querySelectorAll(
+        ".folder-product-checkbox:checked"
+      )
+    ).map(
+      checkbox =>
+        Number(checkbox.value)
+    );
+
+  try {
+
+    await API.put(
+      `/admin/folders/${currentFolderId}/products`,
+      {
+        product_ids: selected
+      }
+    );
+
+    alert(
+      "Đã cập nhật sản phẩm trong Folder."
+    );
+
+    closeFolderProducts();
+
+  } catch (error) {
+
+    console.error(
+      "SAVE FOLDER PRODUCTS ERROR:",
+      error
+    );
+
+    alert(
+      error.message ||
+      "Không thể cập nhật sản phẩm."
+    );
+  }
+}
+
+
+function closeFolderProducts() {
+
+  const modal =
+    document.getElementById(
+      "folderProductsModal"
+    );
+
+  if (modal) {
+    modal.style.display = "none";
+  }
+
+  currentFolderId = null;
+}
 function openFolderForm(folderId = null) {
   const form = document.getElementById("folderForm");
 
@@ -1120,6 +1299,29 @@ function initFolderEvents() {
     );
   }
 }
+  const saveFolderProductsButton =
+    document.getElementById(
+      "saveFolderProductsButton"
+    );
+
+  if (saveFolderProductsButton) {
+    saveFolderProductsButton.addEventListener(
+      "click",
+      saveFolderProducts
+    );
+  }
+
+  const closeFolderProductsButton =
+    document.getElementById(
+      "closeFolderProductsButton"
+    );
+
+  if (closeFolderProductsButton) {
+    closeFolderProductsButton.addEventListener(
+      "click",
+      closeFolderProducts
+    );
+  }
 // ============================
 // PRODUCT MODAL
 // ============================
