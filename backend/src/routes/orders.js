@@ -169,7 +169,7 @@ const balance = Number(user.balance);
           status
         )
       VALUES
-        ($1, $2, $3, 0, $3, 'balance', 'completed')
+  ($1, $2, $3, $4, $5, 'balance', 'completed')
       RETURNING
         id,
         user_id,
@@ -182,10 +182,12 @@ const balance = Number(user.balance);
         created_at
       `,
       [
-        userId,
-        orderCode,
-        price
-      ]
+  userId,
+  orderCode,
+  originalPrice,
+  discount,
+  price
+]
     );
 
     const order = orderResult.rows[0];
@@ -242,8 +244,11 @@ const balance = Number(user.balance);
         product_id: product.id,
         product_name: product.name,
         price: price,
-        total: price,
-        status: order.status,
+subtotal: originalPrice,
+discount: discount,
+total: price,
+seller_discount_percent: sellerDiscountPercent,
+status: order.status,
         payment_method: order.payment_method,
         created_at: order.created_at
       },
