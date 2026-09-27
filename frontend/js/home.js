@@ -770,10 +770,6 @@ async function loadProducts() {
 
 
     // Hiển thị PROXY bên dưới
-   renderProxyFolder(
-  proxyProducts,
-  normalProducts
-);
 
   } catch (error) {
 
