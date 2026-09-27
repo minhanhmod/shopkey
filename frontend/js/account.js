@@ -541,11 +541,11 @@ if (topupButton) {
               rel="noopener noreferrer"
               class="btn btn-primary"
             >
-              Mở trang thanh toán PayOS
+              Mở trang thanh toán
             </a>
 
             <p class="topup-note">
-              Quét mã QR hoặc mở trang PayOS để thanh toán.
+              Quét mã QR để thanh toán.
             </p>
           </div>
         `;
@@ -586,7 +586,7 @@ if (topupButton) {
 
     } finally {
       topupButton.disabled = false;
-      topupButton.textContent = "💳 Nạp tiền qua PayOS";
+      topupButton.textContent = "💳 Nạp tiền";
     }
   });
 }
