@@ -62,6 +62,7 @@ const topupCheckout =
   document.getElementById("topupCheckout");
 
 let currentTopupOrderCode = null;
+let currentTopupAmount = 0;
 let topupPollTimer = null;
 
 
