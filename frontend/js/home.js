@@ -683,6 +683,10 @@ function showFolderProducts(
   products = folderProducts;
 
   renderProducts(folderProducts);
+  document.getElementById("products")?.scrollIntoView({
+  behavior: "smooth",
+  block: "start"
+});
 
   const backButton =
     document.createElement("button");
