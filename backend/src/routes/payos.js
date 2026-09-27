@@ -52,13 +52,30 @@ router.post("/webhook", async (req, res) => {
     );
 
     if (topupResult.rows.length === 0) {
-      await client.query("ROLLBACK");
+  await client.query("ROLLBACK");
 
-      return res.status(404).json({
-        message: "Không tìm thấy đơn nạp tiền"
-      });
-    }
+  /*
+   * PayOS gửi webhook mẫu khi confirm webhook.
+   * Payload mẫu dùng orderCode = 123.
+   * Không được tạo đơn hoặc cộng tiền trong trường hợp này.
+   */
+  if (
+    orderCode === 123 &&
+    amount === 3000 &&
+    webhookData.paymentLinkId ===
+      "124c33293c43417ab7879e14c8d9eb18"
+  ) {
+    console.log("PAYOS WEBHOOK VALIDATION OK");
 
+    return res.json({
+      message: "Webhook validation successful"
+    });
+  }
+
+  return res.status(404).json({
+    message: "Không tìm thấy đơn nạp tiền"
+  });
+}
     const topup = topupResult.rows[0];
 
     /*
