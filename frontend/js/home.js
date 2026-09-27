@@ -187,19 +187,54 @@ function renderProducts(list) {
           </button>
         `;
 
-      } else {
+} else {
 
-        buyButton = `
-          <button
-            class="btn btn-primary buy-button"
-            data-product-id="${product.id}"
-          >
-            MUA NGAY
-          </button>
-        `;
+  buyButton = `
+    <div class="quantity-box">
 
-      }
+      <button
+        type="button"
+        class="quantity-minus"
+        data-product-id="${product.id}"
+      >
+        −
+      </button>
 
+      <span
+        class="quantity-value"
+        data-product-id="${product.id}"
+      >
+        1
+      </span>
+
+      <button
+        type="button"
+        class="quantity-plus"
+        data-product-id="${product.id}"
+      >
+        +
+      </button>
+
+    </div>
+
+    <div
+      class="quantity-total"
+      data-product-id="${product.id}"
+    >
+      Tổng: ${formatMoney(finalPrice)}
+    </div>
+
+    <button
+      class="btn btn-primary buy-button"
+      data-product-id="${product.id}"
+      data-price="${finalPrice}"
+      data-stock="${stock}"
+    >
+      MUA NGAY
+    </button>
+  `;
+
+}
 
       return `
         <article class="product-card">
@@ -426,7 +461,6 @@ async function buyProduct(
       "pixelkey_token"
     );
 
-
   // Chưa đăng nhập
   if (!token) {
 
@@ -436,7 +470,6 @@ async function buyProduct(
         "Đi tới trang đăng nhập?"
       );
 
-
     if (goLogin) {
 
       window.location.href =
@@ -444,11 +477,9 @@ async function buyProduct(
 
     }
 
-
     return;
 
   }
-
 
   const product =
     products.find(
@@ -456,7 +487,6 @@ async function buyProduct(
         Number(item.id) ===
         Number(productId)
     );
-
 
   if (!product) {
 
@@ -468,21 +498,47 @@ async function buyProduct(
 
   }
 
+  // Lấy số lượng từ ô quantity
+  const quantityElement =
+    document.querySelector(
+      `.quantity-value[data-product-id="${productId}"]`
+    );
+
+  let quantity =
+    Number(
+      quantityElement?.textContent || 1
+    );
+
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    quantity = 1;
+  }
+
+  const stock =
+    Number(product.stock || 0);
+
+  if (quantity > stock) {
+
+    alert(
+      `Kho chỉ còn ${stock} key.`
+    );
+
+    return;
+
+  }
 
   const finalPrice =
     getProductPrice(product);
 
-
-  const price =
-    formatMoney(finalPrice);
-
+  const total =
+    finalPrice * quantity;
 
   const confirmed =
     confirm(
-      `Bạn có chắc muốn mua "${product.name}" ` +
-      `với giá ${price} không?`
+      `Bạn có chắc muốn mua "${product.name}"?\n\n` +
+      `Số lượng: ${quantity} key\n` +
+      `Đơn giá: ${formatMoney(finalPrice)}\n` +
+      `Tổng tiền: ${formatMoney(total)}`
     );
-
 
   if (!confirmed) {
 
@@ -490,16 +546,13 @@ async function buyProduct(
 
   }
 
-
   const oldText =
     button.textContent;
-
 
   button.disabled = true;
 
   button.textContent =
     "ĐANG MUA...";
-
 
   try {
 
@@ -507,10 +560,25 @@ async function buyProduct(
       await API.post(
         "/orders",
         {
-          product_id: productId
+          product_id: productId,
+          quantity: quantity
         }
       );
 
+    const keys =
+      Array.isArray(result.game_keys)
+        ? result.game_keys
+        : [];
+
+    const keyText =
+      keys.length > 0
+        ? keys
+            .map(
+              (key, index) =>
+                `${index + 1}. ${key}`
+            )
+            .join("\n")
+        : "Không có key";
 
     alert(
       `MUA GAME THÀNH CÔNG!\n\n` +
@@ -519,15 +587,18 @@ async function buyProduct(
         result.order.product_name
       }\n` +
 
+      `Số lượng: ${
+        result.order.quantity
+      } key\n` +
+
       `Mã đơn: ${
         result.order.order_code
       }\n\n` +
 
-      `GAME KEY:\n${
-        result.game_key
-      }\n\n` +
+      `GAME KEY:\n` +
+      `${keyText}\n\n` +
 
-      `Số tiền: ${
+      `Tổng tiền: ${
         formatMoney(
           result.order.total
         )
@@ -540,7 +611,6 @@ async function buyProduct(
       }`
     );
 
-
     // Cập nhật user local
     try {
 
@@ -551,10 +621,8 @@ async function buyProduct(
           ) || "{}"
         );
 
-
       user.balance =
         result.balance;
-
 
       localStorage.setItem(
         "pixelkey_user",
@@ -563,21 +631,17 @@ async function buyProduct(
 
     } catch {}
 
-
     // Tải lại sản phẩm
     await loadProducts();
-
 
   } catch (error) {
 
     console.error(error);
 
-
     alert(
       `Không thể mua game.\n\n` +
       `${error.message}`
     );
-
 
     button.disabled = false;
 
@@ -587,7 +651,6 @@ async function buyProduct(
   }
 
 }
-
 
 // ============================
 // SEARCH
