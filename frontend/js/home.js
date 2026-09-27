@@ -268,26 +268,29 @@ function renderProducts(list) {
             </p>
 
 
-            <div class="product-footer">
+<div class="product-footer">
 
-              <div>
+  <div class="product-purchase">
 
-                ${priceHtml}
+    ${buyButton}
 
-                <div class="product-stock">
-                  ${
-                    stock > 0
-                      ? `Còn ${stock} key`
-                      : "Hết hàng"
-                  }
-                </div>
+    <div class="product-price-area">
 
-              </div>
+      ${priceHtml}
 
+      <div class="product-stock">
+        ${
+          stock > 0
+            ? `Còn ${stock} key`
+            : "Hết hàng"
+        }
+      </div>
 
-              ${buyButton}
+    </div>
 
-            </div>
+  </div>
+
+</div>
 
           </div>
 
