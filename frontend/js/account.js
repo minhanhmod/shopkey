@@ -511,6 +511,10 @@ if (topupButton) {
       const data = await API.post("/topups", {
         amount
       });
+      currentTopupOrderCode = data.orderCode;
+currentTopupAmount = Number(data.amount);
+
+clearInterval(topupPollTimer);
 
       if (topupResultBox) {
         topupResultBox.hidden = false;
