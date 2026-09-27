@@ -181,59 +181,62 @@ function renderUsers(list) {
 
         <td>
 
-          <div class="admin-actions">
+<div class="admin-actions">
 
-            <button
-              class="small-btn add-money"
-              data-id="${user.id}"
-              data-name="${escapeHtml(user.username)}"
-            >
-              + TIỀN
-            </button>
+  <button
+    class="small-btn add-money"
+    data-id="${user.id}"
+    data-name="${escapeHtml(user.username)}"
+  >
+    + TIỀN
+  </button>
 
-${
-  user.role !== "admin"
-    ? `
-      <button
-        class="small-btn toggle-user"
-        data-id="${user.id}"
-        data-active="${active}"
-      >
-        ${active ? "KHÓA" : "MỞ"}
-      </button>
+  ${
+    user.role !== "admin"
+      ? `
+        <button
+          class="small-btn toggle-user"
+          data-id="${user.id}"
+          data-active="${active}"
+        >
+          ${active ? "KHÓA" : "MỞ"}
+        </button>
 
-${
-  user.role === "seller"
-    ? `
-      <button
-        class="small-btn seller-discount-btn"
-        data-id="${user.id}"
-        data-name="${escapeHtml(user.username)}"
-        data-discount="${Number(user.seller_discount_percent || 0)}"
-      >
-        GIẢM ${Number(user.seller_discount_percent || 0)}%
-      </button>
+        ${
+          user.role === "seller"
+            ? `
+              <button
+                class="small-btn seller-discount-btn"
+                data-id="${user.id}"
+                data-name="${escapeHtml(user.username)}"
+                data-discount="${Number(user.seller_discount_percent || 0)}"
+              >
+                GIẢM ${Number(user.seller_discount_percent || 0)}%
+              </button>
 
-      <button
-        class="small-btn seller-demote-btn"
-        data-id="${user.id}"
-        data-name="${escapeHtml(user.username)}"
-      >
-        HẠ SELLER
-      </button>
-    `
-    : `
-      <button
-        class="small-btn seller-promote-btn"
-        data-id="${user.id}"
-        data-name="${escapeHtml(user.username)}"
-      >
-        NÂNG SELLER
-      </button>
-    `
-}
+              <button
+                class="small-btn seller-demote-btn"
+                data-id="${user.id}"
+                data-name="${escapeHtml(user.username)}"
+              >
+                HẠ SELLER
+              </button>
+            `
+            : `
+              <button
+                class="small-btn seller-promote-btn"
+                data-id="${user.id}"
+                data-name="${escapeHtml(user.username)}"
+              >
+                NÂNG SELLER
+              </button>
+            `
+        }
+      `
+      : ""
+  }
 
-          </div>
+</div>
 
         </td>
 
