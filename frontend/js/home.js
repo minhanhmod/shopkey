@@ -705,15 +705,20 @@ function showFolderProducts(
   );
 
   backButton.addEventListener(
-    "click",
-    () => {
+  "click",
+  async () => {
 
-      productsGrid.innerHTML = "";
+    productsGrid.innerHTML = "";
 
-      loadProducts();
+    await loadFolders();
 
-    }
-  );
+    document.getElementById("folders")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+
+  }
+);
 }
 
 // ============================
