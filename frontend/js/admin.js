@@ -202,32 +202,35 @@ ${
         ${active ? "KHÓA" : "MỞ"}
       </button>
 
-      ${
-        user.role === "seller"
-          ? `
-            <button
-              class="small-btn seller-btn"
-              data-id="${user.id}"
-              data-role="seller"
-              data-name="${escapeHtml(user.username)}"
-              data-discount="${Number(user.seller_discount_percent || 0)}"
-            >
-              SELLER ${Number(user.seller_discount_percent || 0)}%
-            </button>
-          `
-          : `
-            <button
-              class="small-btn seller-btn"
-              data-id="${user.id}"
-              data-role="user"
-              data-name="${escapeHtml(user.username)}"
-            >
-              NÂNG SELLER
-            </button>
-          `
-      }
+${
+  user.role === "seller"
+    ? `
+      <button
+        class="small-btn seller-discount-btn"
+        data-id="${user.id}"
+        data-name="${escapeHtml(user.username)}"
+        data-discount="${Number(user.seller_discount_percent || 0)}"
+      >
+        GIẢM ${Number(user.seller_discount_percent || 0)}%
+      </button>
+
+      <button
+        class="small-btn seller-demote-btn"
+        data-id="${user.id}"
+        data-name="${escapeHtml(user.username)}"
+      >
+        HẠ SELLER
+      </button>
     `
-    : ""
+    : `
+      <button
+        class="small-btn seller-promote-btn"
+        data-id="${user.id}"
+        data-name="${escapeHtml(user.username)}"
+      >
+        NÂNG SELLER
+      </button>
+    `
 }
 
           </div>
@@ -268,24 +271,42 @@ ${
       });
 
     });
-  document.querySelectorAll(".seller-btn")
+document.querySelectorAll(".seller-promote-btn")
   .forEach(button => {
 
     button.addEventListener("click", () => {
 
       changeSellerRole(
         Number(button.dataset.id),
-        button.dataset.role,
+        "user",
         button.dataset.name
       );
 
     });
 
   });
-  document.querySelectorAll(".seller-btn[data-role='seller']")
+
+
+document.querySelectorAll(".seller-demote-btn")
   .forEach(button => {
 
-    button.addEventListener("dblclick", () => {
+    button.addEventListener("click", () => {
+
+      changeSellerRole(
+        Number(button.dataset.id),
+        "seller",
+        button.dataset.name
+      );
+
+    });
+
+  });
+
+
+document.querySelectorAll(".seller-discount-btn")
+  .forEach(button => {
+
+    button.addEventListener("click", () => {
 
       changeSellerDiscount(
         Number(button.dataset.id),
