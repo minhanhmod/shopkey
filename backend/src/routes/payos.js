@@ -141,8 +141,9 @@ console.log("HEADERS:", {
 
   return res.status(500).json({
     message: "Webhook xử lý thất bại"
+  }
   });
-
+  
 /*
  * Xem trạng thái thanh toán từ PayOS
  */
