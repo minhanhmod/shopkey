@@ -2900,9 +2900,9 @@ footer {
   justify-content: center;
 
   border: 0;
-  background: #f3f4f6;
+  background: #22c55e;
 
-  color: #111827;
+  color: #ffffff;
   font-size: 21px;
   font-weight: 900;
 
@@ -2915,7 +2915,7 @@ footer {
 
 .quantity-minus:hover,
 .quantity-plus:hover {
-  background: #e5e7eb;
+  background: #16a34a;
 }
 
 .quantity-minus:active,
@@ -2946,9 +2946,9 @@ footer {
 
   text-align: center;
 
-  color: #475569;
-  font-size: 13px;
-  font-weight: 700;
+  color: #16a34a;
+  font-size: 14px;
+  font-weight: 800;
 }
 /* ================================
    PRODUCT PURCHASE AREA
