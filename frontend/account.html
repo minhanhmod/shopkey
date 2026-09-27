@@ -211,7 +211,15 @@
             💳 Nạp tiền qua
           </button>
 
-          <div id="topupResult" class="topup-result"></div>
+          <div id="topupResult" class="topup-result">
+
+  <div id="topupQrBox" class="topup-qr-box" hidden>
+    <img id="topupQr" alt="QR thanh toán PayOS">
+  </div>
+
+  <div id="topupPaymentInfo" class="topup-payment-info"></div>
+
+</div>
 
         </div>
 
@@ -277,7 +285,7 @@
 
 <script src="./js/config.js"></script>
 <script src="./js/api.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script src="./js/account.js"></script>
 
 </body>
