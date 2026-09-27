@@ -683,33 +683,58 @@ if (topupButton) {
         amount
       });
 
-      result.innerHTML = `
-        <div class="topup-payment">
-          <h3>Thanh toán đang chờ</h3>
+const qrBox = document.getElementById("topupQrBox");
+const qrImage = document.getElementById("topupQr");
 
-          <p>
-            Mã đơn:
-            <strong>${data.orderCode}</strong>
-          </p>
+result.innerHTML = `
+  <div class="topup-payment">
 
-          <p>
-            Số tiền:
-            <strong>${formatMoney(data.amount)}</strong>
-          </p>
+    <h3>Thanh toán đang chờ</h3>
 
-          <a
-            href="${data.checkoutUrl}"
-            target="_blank"
-            class="btn btn-primary"
-          >
-            Mở trang thanh toán PayOS
-          </a>
+    <p>
+      Mã đơn:
+      <strong>${data.orderCode}</strong>
+    </p>
 
-          <p class="topup-note">
-            Sau khi thanh toán thành công, số dư sẽ được cập nhật.
-          </p>
-        </div>
-      `;
+    <p>
+      Số tiền:
+      <strong>${formatMoney(data.amount)}</strong>
+    </p>
+
+    <p>
+      Nội dung chuyển khoản:
+      <strong>NAP ${data.orderCode}</strong>
+    </p>
+
+    <a
+      href="${data.checkoutUrl}"
+      target="_blank"
+      class="btn btn-primary"
+    >
+      Mở trang thanh toán PayOS
+    </a>
+
+    <p class="topup-note">
+      Quét mã QR hoặc mở trang PayOS để thanh toán.
+    </p>
+
+  </div>
+`;
+
+if (data.qrCode && qrImage && qrBox) {
+  qrBox.hidden = false;
+
+  QRCode.toDataURL(data.qrCode, {
+    width: 280,
+    margin: 2
+  })
+    .then((url) => {
+      qrImage.src = url;
+    })
+    .catch((error) => {
+      console.error("Không tạo được QR:", error);
+    });
+}
 
     } catch (error) {
       result.innerHTML = `
