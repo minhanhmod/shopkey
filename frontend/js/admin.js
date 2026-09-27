@@ -749,9 +749,11 @@ function renderFolders() {
 
   if (!folders.length) {
     container.innerHTML = `
-      <div class="empty-state">
-        Chưa có folder nào.
-      </div>
+      <tr>
+        <td colspan="7">
+          Chưa có Folder nào.
+        </td>
+      </tr>
     `;
 
     return;
@@ -759,93 +761,87 @@ function renderFolders() {
 
   container.innerHTML = folders.map(folder => {
 
-    const image = folder.image_url
+    const imageHtml = folder.image_url
       ? `
         <img
           src="${escapeHtml(folder.image_url)}"
           alt="${escapeHtml(folder.name)}"
-          class="admin-folder-image"
+          style="
+            width: 70px;
+            height: 50px;
+            object-fit: cover;
+            border: 2px solid #111827;
+          "
         >
       `
       : `
-        <div class="admin-folder-no-image">
-          📁
-        </div>
+        <span>Không có ảnh</span>
       `;
 
     return `
-      <div
-        class="admin-folder-card"
-        data-folder-id="${folder.id}"
-      >
+      <tr>
 
-        <div class="admin-folder-preview">
-          ${image}
-        </div>
+        <td>
+          #${folder.id}
+        </td>
 
-        <div class="admin-folder-content">
-
-          <div class="admin-folder-name">
+        <td>
+          <strong>
             ${escapeHtml(folder.name)}
-          </div>
+          </strong>
+        </td>
 
-          <div class="admin-folder-description">
-            ${escapeHtml(
-              folder.description || "Không có mô tả"
-            )}
-          </div>
+        <td>
+          ${escapeHtml(
+            folder.description || "—"
+          )}
+        </td>
 
-          <div class="admin-folder-meta">
+        <td>
+          ${imageHtml}
+        </td>
 
-            <span>
-              Nút:
-              <strong>
-                ${escapeHtml(
-                  folder.button_text
-                )}
-              </strong>
-            </span>
+        <td>
+          ${folder.sort_order}
+        </td>
 
-            <span>
-              Thứ tự:
-              <strong>
-                ${folder.sort_order}
-              </strong>
-            </span>
+        <td>
+          ${
+            folder.is_active
+              ? `
+                <span class="status-badge active">
+                  ACTIVE
+                </span>
+              `
+              : `
+                <span class="status-badge inactive">
+                  HIDDEN
+                </span>
+              `
+          }
+        </td>
 
-            <span>
-              ${
-                folder.is_active
-                  ? "🟢 Đang hiển thị"
-                  : "🔴 Đang ẩn"
-              }
-            </span>
+        <td>
 
-          </div>
+          <button
+            type="button"
+            class="btn btn-secondary edit-folder-button"
+            data-folder-id="${folder.id}"
+          >
+            SỬA
+          </button>
 
-          <div class="admin-folder-actions">
+          <button
+            type="button"
+            class="btn btn-danger delete-folder-button"
+            data-folder-id="${folder.id}"
+          >
+            XÓA
+          </button>
 
-            <button
-              type="button"
-              class="btn btn-secondary edit-folder-button"
-              data-folder-id="${folder.id}"
-            >
-              SỬA
-            </button>
+        </td>
 
-            <button
-              type="button"
-              class="btn btn-danger delete-folder-button"
-              data-folder-id="${folder.id}"
-            >
-              XÓA
-            </button>
-
-          </div>
-
-        </div>
-
-      </div>
+      </tr>
     `;
   }).join("");
 
