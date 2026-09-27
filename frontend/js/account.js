@@ -684,7 +684,6 @@ if (topupButton) {
       });
 
 const qrBox = document.getElementById("topupQrBox");
-const qrImage = document.getElementById("topupQr");
 
 result.innerHTML = `
   <div class="topup-payment">
