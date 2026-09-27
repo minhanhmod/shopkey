@@ -15,6 +15,7 @@ router.post("/", requireAuth, async (req, res) => {
   try {
     const userId = req.user.sub;
     const productId = Number(req.body.product_id);
+    const quantity = Number(req.body.quantity || 1);
 
     if (!Number.isInteger(productId) || productId <= 0) {
       return res.status(400).json({
@@ -22,21 +23,31 @@ router.post("/", requireAuth, async (req, res) => {
       });
     }
 
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1 ||
+      quantity > 50
+    ) {
+      return res.status(400).json({
+        message: "Số lượng phải từ 1 đến 50"
+      });
+    }
+
     await client.query("BEGIN");
 
-    // Khóa user để tránh 2 giao dịch trừ tiền cùng lúc
+    // Khóa tài khoản
     const userResult = await client.query(
       `
       SELECT
-  id,
-  username,
-  balance,
-  is_active,
-  role,
-  seller_discount_percent
-FROM users
-WHERE id = $1
-FOR UPDATE
+        id,
+        username,
+        balance,
+        is_active,
+        role,
+        seller_discount_percent
+      FROM users
+      WHERE id = $1
+      FOR UPDATE
       `,
       [userId]
     );
@@ -62,7 +73,12 @@ FOR UPDATE
     // Khóa sản phẩm
     const productResult = await client.query(
       `
-      SELECT id, name, price, stock, is_active
+      SELECT
+        id,
+        name,
+        price,
+        stock,
+        is_active
       FROM products
       WHERE id = $1
       FOR UPDATE
@@ -88,74 +104,100 @@ FOR UPDATE
       });
     }
 
-    if (product.stock <= 0) {
+    // Kiểm tra kho
+    if (Number(product.stock) < quantity) {
       await client.query("ROLLBACK");
 
       return res.status(400).json({
-        message: "Sản phẩm đã hết hàng"
+        message: `Kho chỉ còn ${product.stock} key`
       });
     }
 
-const originalPrice = Number(product.price);
+    // Giá 1 key
+    const originalPrice = Number(product.price);
 
-const sellerDiscountPercent =
-  user.role === "seller"
-    ? Number(user.seller_discount_percent || 0)
-    : 0;
+    const sellerDiscountPercent =
+      user.role === "seller"
+        ? Number(user.seller_discount_percent || 0)
+        : 0;
 
-const discount = Number(
-  (originalPrice * sellerDiscountPercent / 100).toFixed(2)
-);
+    const discountPerKey = Number(
+      (
+        originalPrice *
+        sellerDiscountPercent /
+        100
+      ).toFixed(2)
+    );
 
-const price = Number(
-  (originalPrice - discount).toFixed(2)
-);
+    const pricePerKey = Number(
+      (
+        originalPrice -
+        discountPerKey
+      ).toFixed(2)
+    );
 
-const balance = Number(user.balance);
+    // Tổng tiền
+    const subtotal = Number(
+      (originalPrice * quantity).toFixed(2)
+    );
 
-    if (balance < price) {
+    const discount = Number(
+      (discountPerKey * quantity).toFixed(2)
+    );
+
+    const total = Number(
+      (pricePerKey * quantity).toFixed(2)
+    );
+
+    const balance = Number(user.balance);
+
+    if (balance < total) {
       await client.query("ROLLBACK");
 
       return res.status(400).json({
         message: "Số dư không đủ",
         balance,
-        required: price,
-        missing: Number((price - balance).toFixed(2))
+        required: total,
+        missing: Number(
+          (total - balance).toFixed(2)
+        )
       });
     }
 
     /*
-      Lấy đúng 1 key còn available.
-      FOR UPDATE SKIP LOCKED giúp tránh 2 người
-      lấy cùng một key khi mua đồng thời.
+      Lấy đúng số key khách yêu cầu.
+      SKIP LOCKED tránh 2 người lấy trùng key.
     */
     const keyResult = await client.query(
       `
-      SELECT id, key_value
+      SELECT
+        id,
+        key_value
       FROM game_keys
       WHERE product_id = $1
         AND status = 'available'
       ORDER BY id
-      LIMIT 1
+      LIMIT $2
       FOR UPDATE SKIP LOCKED
       `,
-      [productId]
+      [productId, quantity]
     );
 
-    if (keyResult.rows.length === 0) {
+    if (keyResult.rows.length < quantity) {
       await client.query("ROLLBACK");
 
       return res.status(400).json({
-        message: "Không còn game key khả dụng"
+        message: "Không đủ game key trong kho"
       });
     }
 
-    const gameKey = keyResult.rows[0];
-
     const orderCode =
-      `PK-${Date.now()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+      `PK-${Date.now()}-${crypto
+        .randomBytes(3)
+        .toString("hex")
+        .toUpperCase()}`;
 
-    // Tạo order
+    // Tạo đơn hàng
     const orderResult = await client.query(
       `
       INSERT INTO orders
@@ -169,7 +211,7 @@ const balance = Number(user.balance);
           status
         )
       VALUES
-  ($1, $2, $3, $4, $5, 'balance', 'completed')
+        ($1, $2, $3, $4, $5, 'balance', 'completed')
       RETURNING
         id,
         user_id,
@@ -182,30 +224,37 @@ const balance = Number(user.balance);
         created_at
       `,
       [
-  userId,
-  orderCode,
-  originalPrice,
-  discount,
-  price
-]
+        userId,
+        orderCode,
+        subtotal,
+        discount,
+        total
+      ]
     );
 
     const order = orderResult.rows[0];
 
     // Trừ tiền
-    const newBalance = balance - price;
+    const newBalance = Number(
+      (balance - total).toFixed(2)
+    );
 
     await client.query(
       `
       UPDATE users
-      SET balance = $1,
-          updated_at = NOW()
+      SET
+        balance = $1,
+        updated_at = NOW()
       WHERE id = $2
       `,
       [newBalance, userId]
     );
 
-    // Đánh dấu key đã bán
+    // Đánh dấu tất cả key đã bán
+    const keyIds = keyResult.rows.map(
+      row => row.id
+    );
+
     await client.query(
       `
       UPDATE game_keys
@@ -214,23 +263,26 @@ const balance = Number(user.balance);
         order_id = $1,
         sold_to_user_id = $2,
         sold_at = NOW()
-      WHERE id = $3
+      WHERE id = ANY($3::int[])
       `,
       [
         order.id,
         userId,
-        gameKey.id
+        keyIds
       ]
     );
 
-    // Giảm stock
+    // Giảm stock đúng số lượng
     await client.query(
       `
       UPDATE products
-      SET stock = stock - 1
-      WHERE id = $1
+      SET stock = stock - $1
+      WHERE id = $2
       `,
-      [productId]
+      [
+        quantity,
+        productId
+      ]
     );
 
     await client.query("COMMIT");
@@ -243,39 +295,56 @@ const balance = Number(user.balance);
         order_code: order.order_code,
         product_id: product.id,
         product_name: product.name,
-        price: price,
-subtotal: originalPrice,
-discount: discount,
-total: price,
-seller_discount_percent: sellerDiscountPercent,
-status: order.status,
-        payment_method: order.payment_method,
-        created_at: order.created_at
+
+        quantity,
+
+        price_per_key: pricePerKey,
+
+        subtotal,
+
+        discount,
+
+        total,
+
+        seller_discount_percent:
+          sellerDiscountPercent,
+
+        status: order.status,
+
+        payment_method:
+          order.payment_method,
+
+        created_at:
+          order.created_at
       },
 
-      game_key: gameKey.key_value,
+      game_keys: keyResult.rows.map(
+        row => row.key_value
+      ),
 
-      balance: Number(newBalance.toFixed(2)),
+      balance:
+        Number(newBalance.toFixed(2)),
 
-      stock: product.stock - 1
+      stock:
+        Number(product.stock) - quantity
     });
 
   } catch (error) {
     await client.query("ROLLBACK");
 
-    console.error("BUY GAME ERROR:", error);
+    console.error(
+      "BUY GAME ERROR:",
+      error
+    );
 
     return res.status(500).json({
-      message: "Không thể mua game",
-      error: error.message
+      message: "Không thể mua game"
     });
 
   } finally {
     client.release();
   }
 });
-
-
 /*
   GET /api/orders
   Lịch sử đơn hàng của user
