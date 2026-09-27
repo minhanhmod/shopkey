@@ -822,7 +822,13 @@ function renderFolders() {
         </td>
 
         <td>
-
+<button
+  type="button"
+  class="btn btn-secondary folder-products-button"
+  data-folder-id="${folder.id}"
+>
+  SẢN PHẨM
+</button>
           <button
             type="button"
             class="btn btn-secondary edit-folder-button"
@@ -879,6 +885,23 @@ function bindFolderButtons() {
             Number(button.dataset.folderId);
 
           deleteFolder(folderId);
+        }
+      );
+
+    });
+
+
+  document
+    .querySelectorAll(".folder-products-button")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+          const folderId =
+            Number(button.dataset.folderId);
+
+          openFolderProducts(folderId);
         }
       );
 
