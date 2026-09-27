@@ -656,7 +656,7 @@ function showFolderProducts(
     return;
   }
 
-  const products =
+  const folderProducts =
     Array.isArray(folder.products)
       ? folder.products
       : [];
@@ -667,7 +667,7 @@ function showFolderProducts(
 
   productsGrid.innerHTML = "";
 
-  if (!products.length) {
+  if (!folderProducts.length) {
 
     productsGrid.innerHTML = `
       <div class="loading">
@@ -678,7 +678,11 @@ function showFolderProducts(
     return;
   }
 
-  renderProducts(products);
+  // Đồng bộ sản phẩm Folder vào biến toàn cục
+  // để nút + / − và MUA NGAY hoạt động đúng.
+  products = folderProducts;
+
+  renderProducts(folderProducts);
 
   const backButton =
     document.createElement("button");
