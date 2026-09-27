@@ -131,19 +131,17 @@ console.log("HEADERS:", {
     return res.json({
       message: "Thanh toán đã được xử lý"
     });
-  } catch (error) {
-    await client.query("ROLLBACK");
+ } catch (error) {
+  await client.query("ROLLBACK");
 
-    console.error("PayOS webhook error:", error);
+  console.error("PAYOS WEBHOOK VERIFY ERROR:", {
+    name: error.name,
+    message: error.message
+  });
 
-    return res.status(500).json({
-      message: "Webhook xử lý thất bại"
-    });
-  } finally {
-    client.release();
-  }
-});
-
+  return res.status(500).json({
+    message: "Webhook xử lý thất bại"
+  });
 
 /*
  * Xem trạng thái thanh toán từ PayOS
