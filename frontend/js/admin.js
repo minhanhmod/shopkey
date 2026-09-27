@@ -336,11 +336,40 @@ async function changeSellerRole(userId, role, username) {
   )) {
     return;
   }
-  // ============================
+
+  try {
+
+    await API.put(
+      `/admin/users/${userId}/role`,
+      {
+        role: isSeller ? "user" : "seller"
+      }
+    );
+
+    alert(
+      isSeller
+        ? `Đã hạ ${username} về User.`
+        : `Đã nâng ${username} thành Seller.`
+    );
+
+    await loadUsers();
+
+  } catch (error) {
+
+    alert(error.message);
+  }
+}
+
+
+// ============================
 // SELLER DISCOUNT
 // ============================
 
-async function changeSellerDiscount(userId, username, currentDiscount) {
+async function changeSellerDiscount(
+  userId,
+  username,
+  currentDiscount
+) {
 
   const input = prompt(
     `Nhập % giảm giá cho Seller "${username}":\n\n` +
@@ -385,29 +414,10 @@ async function changeSellerDiscount(userId, username, currentDiscount) {
   }
 }
 
-  try {
 
-    await API.put(
-      `/admin/users/${userId}/role`,
-      {
-        role: isSeller ? "user" : "seller"
-      }
-    );
-
-    alert(
-      isSeller
-        ? `Đã hạ ${username} về User.`
-        : `Đã nâng ${username} thành Seller.`
-    );
-
-    await loadUsers();
-
-  } catch (error) {
-
-    alert(error.message);
-  }
-}
-
+// ============================
+// BALANCE
+// ============================
 // ============================
 // BALANCE
 // ============================
