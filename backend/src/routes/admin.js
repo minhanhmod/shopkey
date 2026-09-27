@@ -403,5 +403,314 @@ router.get("/stats", async (req, res) => {
     });
   }
 });
+// =====================================
+// QUẢN LÝ FOLDER SẢN PHẨM
+// =====================================
 
+// GET /api/admin/folders
+router.get("/folders", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id,
+        name,
+        button_text,
+        description,
+        image_url,
+        sort_order,
+        is_active,
+        created_at,
+        updated_at
+      FROM product_folders
+      ORDER BY sort_order ASC, id ASC
+    `);
+
+    return res.json({
+      folders: result.rows
+    });
+  } catch (error) {
+    console.error("ADMIN FOLDERS GET ERROR:", error);
+
+    return res.status(500).json({
+      message: "Không thể lấy danh sách folder"
+    });
+  }
+});
+
+
+// POST /api/admin/folders
+router.post("/folders", async (req, res) => {
+  try {
+    const name = String(req.body.name || "").trim();
+    const buttonText =
+      String(req.body.button_text || "XEM SẢN PHẨM").trim();
+    const description =
+      String(req.body.description || "").trim();
+    const imageUrl =
+      String(req.body.image_url || "").trim();
+
+    const sortOrder =
+      Number.isInteger(Number(req.body.sort_order))
+        ? Number(req.body.sort_order)
+        : 0;
+
+    const isActive =
+      req.body.is_active !== false;
+
+    if (!name) {
+      return res.status(400).json({
+        message: "Tên folder không được để trống"
+      });
+    }
+
+    if (name.length > 100) {
+      return res.status(400).json({
+        message: "Tên folder tối đa 100 ký tự"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO product_folders (
+        name,
+        button_text,
+        description,
+        image_url,
+        sort_order,
+        is_active
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+      `,
+      [
+        name,
+        buttonText || "XEM SẢN PHẨM",
+        description || null,
+        imageUrl || null,
+        sortOrder,
+        isActive
+      ]
+    );
+
+    return res.status(201).json({
+      message: "Tạo folder thành công",
+      folder: result.rows[0]
+    });
+  } catch (error) {
+    console.error("ADMIN FOLDER CREATE ERROR:", error);
+
+    return res.status(500).json({
+      message: "Không thể tạo folder"
+    });
+  }
+});
+
+
+// PUT /api/admin/folders/:id
+router.put("/folders/:id", async (req, res) => {
+  try {
+    const folderId = Number(req.params.id);
+
+    if (!Number.isInteger(folderId) || folderId <= 0) {
+      return res.status(400).json({
+        message: "Folder ID không hợp lệ"
+      });
+    }
+
+    const name = String(req.body.name || "").trim();
+    const buttonText =
+      String(req.body.button_text || "XEM SẢN PHẨM").trim();
+    const description =
+      String(req.body.description || "").trim();
+    const imageUrl =
+      String(req.body.image_url || "").trim();
+
+    const sortOrder =
+      Number.isInteger(Number(req.body.sort_order))
+        ? Number(req.body.sort_order)
+        : 0;
+
+    const isActive =
+      req.body.is_active !== false;
+
+    if (!name) {
+      return res.status(400).json({
+        message: "Tên folder không được để trống"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE product_folders
+      SET
+        name = $1,
+        button_text = $2,
+        description = $3,
+        image_url = $4,
+        sort_order = $5,
+        is_active = $6,
+        updated_at = NOW()
+      WHERE id = $7
+      RETURNING *
+      `,
+      [
+        name,
+        buttonText || "XEM SẢN PHẨM",
+        description || null,
+        imageUrl || null,
+        sortOrder,
+        isActive,
+        folderId
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Không tìm thấy folder"
+      });
+    }
+
+    return res.json({
+      message: "Cập nhật folder thành công",
+      folder: result.rows[0]
+    });
+  } catch (error) {
+    console.error("ADMIN FOLDER UPDATE ERROR:", error);
+
+    return res.status(500).json({
+      message: "Không thể cập nhật folder"
+    });
+  }
+});
+
+
+// DELETE /api/admin/folders/:id
+router.delete("/folders/:id", async (req, res) => {
+  try {
+    const folderId = Number(req.params.id);
+
+    if (!Number.isInteger(folderId) || folderId <= 0) {
+      return res.status(400).json({
+        message: "Folder ID không hợp lệ"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      DELETE FROM product_folders
+      WHERE id = $1
+      RETURNING id, name
+      `,
+      [folderId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Không tìm thấy folder"
+      });
+    }
+
+    return res.json({
+      message: "Xóa folder thành công",
+      folder: result.rows[0]
+    });
+  } catch (error) {
+    console.error("ADMIN FOLDER DELETE ERROR:", error);
+
+    return res.status(500).json({
+      message: "Không thể xóa folder"
+    });
+  }
+});
+
+
+// PUT /api/admin/folders/:id/products
+// Gán danh sách sản phẩm vào folder
+router.put("/folders/:id/products", async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const folderId = Number(req.params.id);
+
+    if (!Number.isInteger(folderId) || folderId <= 0) {
+      return res.status(400).json({
+        message: "Folder ID không hợp lệ"
+      });
+    }
+
+    const productIds = Array.isArray(req.body.product_ids)
+      ? req.body.product_ids
+          .map(Number)
+          .filter(
+            id => Number.isInteger(id) && id > 0
+          )
+      : [];
+
+    const folderCheck = await client.query(
+      `
+      SELECT id
+      FROM product_folders
+      WHERE id = $1
+      `,
+      [folderId]
+    );
+
+    if (folderCheck.rows.length === 0) {
+      return res.status(404).json({
+        message: "Không tìm thấy folder"
+      });
+    }
+
+    await client.query("BEGIN");
+
+    await client.query(
+      `
+      DELETE FROM product_folder_items
+      WHERE folder_id = $1
+      `,
+      [folderId]
+    );
+
+    for (let i = 0; i < productIds.length; i++) {
+      await client.query(
+        `
+        INSERT INTO product_folder_items (
+          folder_id,
+          product_id,
+          sort_order
+        )
+        VALUES ($1, $2, $3)
+        ON CONFLICT (folder_id, product_id)
+        DO UPDATE SET sort_order = EXCLUDED.sort_order
+        `,
+        [
+          folderId,
+          productIds[i],
+          i
+        ]
+      );
+    }
+
+    await client.query("COMMIT");
+
+    return res.json({
+      message: "Cập nhật sản phẩm trong folder thành công",
+      folder_id: folderId,
+      product_ids: productIds
+    });
+  } catch (error) {
+    await client.query("ROLLBACK");
+
+    console.error(
+      "ADMIN FOLDER PRODUCTS ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      message: "Không thể cập nhật sản phẩm trong folder"
+    });
+  } finally {
+    client.release();
+  }
+});
 export default router;
