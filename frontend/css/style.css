@@ -3175,11 +3175,6 @@ footer {
 
   text-transform: uppercase;
 
-  text-shadow:
-    0 0 5px currentColor,
-    0 0 12px currentColor,
-    0 0 22px currentColor;
-
 animation: announcementTitleColor 0.3s steps(1, end) infinite;
 
   overflow-wrap: anywhere;
