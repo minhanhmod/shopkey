@@ -1086,47 +1086,43 @@ async function openFolderProducts(folderId) {
       "<p>Không thể tải sản phẩm.</p>";
   }
 }
+function saveFolderProducts() {
+  if (!currentFolderId) return;
+
+  const selected = Array.from(
+    document.querySelectorAll(".folder-product-item")
+  )
+    .filter(item =>
+      item.querySelector(".folder-product-checkbox")?.checked
+    )
+    .map(item => Number(item.dataset.productId));
+
+  API.put(`/admin/folders/${currentFolderId}/products`, {
+    product_ids: selected
+  })
+    .then(() => {
+      alert("Đã lưu sản phẩm trong folder!");
+      closeFolderProducts();
+    })
+    .catch(error => {
+      console.error(error);
+      alert(error.message || "Không thể lưu sản phẩm.");
+    });
+}
+
+function closeFolderProducts() {
+  const modal = document.getElementById("folderProductsModal");
+
+  if (modal) {
+    modal.style.display = "none";
+  }
+
+  currentFolderId = null;
+}
+
 function initFolderEvents() {
-  const newFolderButton =
-    document.getElementById("newFolderButton");
-
-  if (newFolderButton) {
-    newFolderButton.addEventListener(
-      "click",
-      () => {
-        openFolderForm();
-      }
-    );
-  }
-
-  const saveFolderButton =
-    document.getElementById("saveFolderButton");
-
-  if (saveFolderButton) {
-    saveFolderButton.addEventListener(
-      "click",
-      saveFolder
-    );
-  }
-
-  const cancelFolderButton =
-    document.getElementById("cancelFolderButton");
-
-  if (cancelFolderButton) {
-    cancelFolderButton.addEventListener(
-      "click",
-      closeFolderForm
-    );
-  }
-
-  // ============================
-  // FOLDER PRODUCTS
-  // ============================
-
   const saveFolderProductsButton =
-    document.getElementById(
-      "saveFolderProductsButton"
-    );
+    document.getElementById("saveFolderProductsButton");
 
   if (saveFolderProductsButton) {
     saveFolderProductsButton.addEventListener(
@@ -1136,9 +1132,7 @@ function initFolderEvents() {
   }
 
   const closeFolderProductsButton =
-    document.getElementById(
-      "closeFolderProductsButton"
-    );
+    document.getElementById("closeFolderProductsButton");
 
   if (closeFolderProductsButton) {
     closeFolderProductsButton.addEventListener(
