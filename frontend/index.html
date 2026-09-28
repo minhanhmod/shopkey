@@ -10,7 +10,54 @@
 </head>
 
 <body>
+<!-- SHOP ANNOUNCEMENT POPUP -->
 
+<div
+  id="announcementOverlay"
+  class="announcement-overlay"
+  style="display: none;"
+>
+  <div
+    id="announcementPopup"
+    class="announcement-popup"
+  >
+
+    <div class="announcement-pixels" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <div class="announcement-header">
+
+      <div
+        id="announcementPopupTitle"
+        class="announcement-title"
+      >
+        THÔNG BÁO SHOP
+      </div>
+
+      <button
+        type="button"
+        id="closeAnnouncementPopup"
+        class="announcement-close"
+        aria-label="Đóng thông báo"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div
+      id="announcementPopupContent"
+      class="announcement-content"
+    ></div>
+
+  </div>
+</div>
   <header class="navbar">
     <div class="container nav-inner">
 
