@@ -1090,6 +1090,42 @@ function closeAnnouncementForm() {
 
   currentAnnouncementId = null;
 }
+function initAnnouncementEvents() {
+  const newButton = document.getElementById(
+    "newAnnouncementButton"
+  );
+
+  if (newButton) {
+    newButton.addEventListener(
+      "click",
+      () => {
+        openAnnouncementForm();
+      }
+    );
+  }
+
+  const saveButton = document.getElementById(
+    "saveAnnouncementButton"
+  );
+
+  if (saveButton) {
+    saveButton.addEventListener(
+      "click",
+      saveAnnouncement
+    );
+  }
+
+  const cancelButton = document.getElementById(
+    "cancelAnnouncementButton"
+  );
+
+  if (cancelButton) {
+    cancelButton.addEventListener(
+      "click",
+      closeAnnouncementForm
+    );
+  }
+}
 function renderFolders() {
   const container =
     document.getElementById("foldersAdminList");
