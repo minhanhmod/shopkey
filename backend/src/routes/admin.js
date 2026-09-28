@@ -858,4 +858,225 @@ router.put("/folders/:id/products", async (req, res) => {
     client.release();
   }
 });
+// =====================================
+// QUẢN LÝ THÔNG BÁO SHOP
+// =====================================
+
+// GET /api/admin/announcements
+router.get("/announcements", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id,
+        title,
+        content,
+        is_active,
+        sort_order,
+        created_at,
+        updated_at
+      FROM shop_announcements
+      ORDER BY sort_order ASC, id DESC
+    `);
+
+    return res.json({
+      announcements: result.rows
+    });
+
+  } catch (error) {
+    console.error("ADMIN ANNOUNCEMENTS GET ERROR:", error);
+
+    return res.status(500).json({
+      message: "Không thể lấy danh sách thông báo"
+    });
+  }
+});
+
+
+// POST /api/admin/announcements
+router.post("/announcements", async (req, res) => {
+  try {
+    const title = String(req.body.title || "").trim();
+    const content = String(req.body.content || "").trim();
+
+    const sortOrder =
+      Number.isInteger(Number(req.body.sort_order))
+        ? Number(req.body.sort_order)
+        : 0;
+
+    const isActive =
+      req.body.is_active !== false;
+
+    if (!title) {
+      return res.status(400).json({
+        message: "Tiêu đề không được để trống"
+      });
+    }
+
+    if (title.length > 150) {
+      return res.status(400).json({
+        message: "Tiêu đề tối đa 150 ký tự"
+      });
+    }
+
+    if (!content) {
+      return res.status(400).json({
+        message: "Nội dung không được để trống"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO shop_announcements (
+        title,
+        content,
+        is_active,
+        sort_order
+      )
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+      `,
+      [
+        title,
+        content,
+        isActive,
+        sortOrder
+      ]
+    );
+
+    return res.status(201).json({
+      message: "Tạo thông báo thành công",
+      announcement: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("ADMIN ANNOUNCEMENT CREATE ERROR:", error);
+
+    return res.status(500).json({
+      message: "Không thể tạo thông báo"
+    });
+  }
+});
+
+
+// PUT /api/admin/announcements/:id
+router.put("/announcements/:id", async (req, res) => {
+  try {
+    const announcementId = Number(req.params.id);
+
+    if (
+      !Number.isInteger(announcementId) ||
+      announcementId <= 0
+    ) {
+      return res.status(400).json({
+        message: "ID thông báo không hợp lệ"
+      });
+    }
+
+    const title = String(req.body.title || "").trim();
+    const content = String(req.body.content || "").trim();
+
+    const sortOrder =
+      Number.isInteger(Number(req.body.sort_order))
+        ? Number(req.body.sort_order)
+        : 0;
+
+    const isActive =
+      req.body.is_active !== false;
+
+    if (!title) {
+      return res.status(400).json({
+        message: "Tiêu đề không được để trống"
+      });
+    }
+
+    if (!content) {
+      return res.status(400).json({
+        message: "Nội dung không được để trống"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE shop_announcements
+      SET
+        title = $1,
+        content = $2,
+        is_active = $3,
+        sort_order = $4,
+        updated_at = NOW()
+      WHERE id = $5
+      RETURNING *
+      `,
+      [
+        title,
+        content,
+        isActive,
+        sortOrder,
+        announcementId
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Không tìm thấy thông báo"
+      });
+    }
+
+    return res.json({
+      message: "Cập nhật thông báo thành công",
+      announcement: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("ADMIN ANNOUNCEMENT UPDATE ERROR:", error);
+
+    return res.status(500).json({
+      message: "Không thể cập nhật thông báo"
+    });
+  }
+});
+
+
+// DELETE /api/admin/announcements/:id
+router.delete("/announcements/:id", async (req, res) => {
+  try {
+    const announcementId = Number(req.params.id);
+
+    if (
+      !Number.isInteger(announcementId) ||
+      announcementId <= 0
+    ) {
+      return res.status(400).json({
+        message: "ID thông báo không hợp lệ"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      DELETE FROM shop_announcements
+      WHERE id = $1
+      RETURNING id, title
+      `,
+      [announcementId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Không tìm thấy thông báo"
+      });
+    }
+
+    return res.json({
+      message: "Xóa thông báo thành công",
+      announcement: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("ADMIN ANNOUNCEMENT DELETE ERROR:", error);
+
+    return res.status(500).json({
+      message: "Không thể xóa thông báo"
+    });
+  }
+});
 export default router;
