@@ -129,7 +129,151 @@
     </div>
 
   </section>
+<!-- ========================= -->
+<!-- SHOP ANNOUNCEMENTS -->
+<!-- ========================= -->
 
+<section class="admin-panel">
+
+  <div class="admin-panel-header">
+    <div>
+      <div class="section-kicker">ANNOUNCEMENTS</div>
+      <h2>Quản lý thông báo</h2>
+    </div>
+
+    <button
+      id="newAnnouncementButton"
+      class="btn btn-primary"
+      type="button"
+    >
+      + THÊM THÔNG BÁO
+    </button>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tiêu đề</th>
+          <th>Nội dung</th>
+          <th>Thứ tự</th>
+          <th>Trạng thái</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+
+      <tbody id="announcementsAdminList">
+        <tr>
+          <td colspan="6">
+            Đang tải thông báo...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</section>
+
+
+<!-- ANNOUNCEMENT FORM -->
+
+<div
+  id="announcementForm"
+  class="admin-form"
+  style="display: none;"
+>
+
+  <input
+    type="hidden"
+    id="announcementId"
+  >
+
+  <div class="admin-form-group">
+    <label for="announcementTitle">
+      Tiêu đề
+    </label>
+
+    <input
+      type="text"
+      id="announcementTitle"
+      maxlength="150"
+      placeholder="Ví dụ: THÔNG BÁO SHOP"
+    >
+  </div>
+
+
+  <div class="admin-form-group">
+    <label for="announcementContent">
+      Nội dung
+    </label>
+
+    <textarea
+      id="announcementContent"
+      rows="6"
+      placeholder="Nhập nội dung thông báo..."
+    ></textarea>
+  </div>
+
+
+  <div class="admin-form-row">
+
+    <div class="admin-form-group">
+      <label for="announcementSortOrder">
+        Thứ tự
+      </label>
+
+      <input
+        type="number"
+        id="announcementSortOrder"
+        value="0"
+        min="0"
+      >
+    </div>
+
+
+    <div class="admin-form-group">
+      <label>
+        Trạng thái
+      </label>
+
+      <label class="checkbox-label">
+        <input
+          type="checkbox"
+          id="announcementIsActive"
+          checked
+        >
+
+        <span>
+          Hiển thị thông báo
+        </span>
+      </label>
+    </div>
+
+  </div>
+
+
+  <div class="admin-form-actions">
+
+    <button
+      type="button"
+      id="saveAnnouncementButton"
+      class="btn btn-primary"
+    >
+      LƯU THÔNG BÁO
+    </button>
+
+    <button
+      type="button"
+      id="cancelAnnouncementButton"
+      class="btn btn-secondary"
+    >
+      HỦY
+    </button>
+
+  </div>
+
+</div>
 
   <!-- ========================= -->
   <!-- PRODUCTS -->
