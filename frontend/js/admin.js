@@ -909,18 +909,11 @@ function bindFolderButtons() {
 
 }
 async function openFolderProducts(folderId) {
-  const modal =
-    document.getElementById("folderProductsModal");
+  const modal = document.getElementById("folderProductsModal");
+  const list = document.getElementById("folderProductsList");
+  const title = document.getElementById("folderProductsTitle");
 
-  const list =
-    document.getElementById("folderProductsList");
-
-  const title =
-    document.getElementById("folderProductsTitle");
-
-  if (!modal || !list) {
-    return;
-  }
+  if (!modal || !list) return;
 
   currentFolderId = folderId;
 
@@ -928,400 +921,171 @@ async function openFolderProducts(folderId) {
     item => Number(item.id) === Number(folderId)
   );
 
-  if (!folder) {
-    return;
-  }
+  if (!folder) return;
 
-  title.textContent =
-    `Folder: ${folder.name}`;
-
-  list.innerHTML =
-    "Đang tải sản phẩm...";
-
+  title.textContent = `Folder: ${folder.name}`;
+  list.innerHTML = "Đang tải sản phẩm...";
   modal.style.display = "block";
 
   try {
+    // Lấy sản phẩm hiện đang nằm trong Folder
+    const result = await API.get(
+      `/admin/folders/${folderId}/products`
+    );
 
-    const result =
-      await API.get(
-        `/admin/folders/${folderId}/products`
-      );
+    const selectedProducts = result.products || [];
 
-    const selectedIds =
-      new Set(
-        (result.products || []).map(
-          product => Number(product.id)
-        )
-      );
+    const selectedIds = new Set(
+      selectedProducts.map(product => Number(product.id))
+    );
 
     if (!products.length) {
       await loadProducts();
     }
 
     if (!products.length) {
-      list.innerHTML =
-        "<p>Chưa có sản phẩm nào.</p>";
+      list.innerHTML = "<p>Chưa có sản phẩm nào.</p>";
       return;
     }
 
-    list.innerHTML =
-      products.map(product => {
+    /*
+     * Sản phẩm đã nằm trong Folder sẽ giữ nguyên
+     * thứ tự hiện tại.
+     *
+     * Sản phẩm chưa nằm trong Folder sẽ nằm phía dưới.
+     */
+    const selectedMap = new Map(
+      selectedProducts.map(product => [
+        Number(product.id),
+        product
+      ])
+    );
 
-        const checked =
-          selectedIds.has(
-            Number(product.id)
-          )
-            ? "checked"
-            : "";
+    const orderedProducts = [
+      ...selectedProducts,
+      ...products.filter(
+        product => !selectedIds.has(Number(product.id))
+      )
+    ];
 
-        return `
-          <label
-            style="
-              display: flex;
-              align-items: center;
-              gap: 10px;
-              padding: 10px;
-              margin-bottom: 8px;
-              border: 1px solid #374151;
-              cursor: pointer;
-            "
+    list.innerHTML = orderedProducts.map(product => {
+
+      const productId = Number(product.id);
+
+      const checked = selectedIds.has(productId)
+        ? "checked"
+        : "";
+
+      return `
+        <div
+          class="folder-product-item"
+          data-product-id="${productId}"
+          style="
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:12px;
+            margin-bottom:8px;
+            border:1px solid #333;
+            border-radius:8px;
+          "
+        >
+
+          <input
+            type="checkbox"
+            class="folder-product-checkbox"
+            value="${productId}"
+            ${checked}
           >
 
-            <input
-              type="checkbox"
-              class="folder-product-checkbox"
-              value="${product.id}"
-              ${checked}
-            >
+          <div style="flex:1;">
+            <strong>${escapeHtml(product.name)}</strong>
+            <div style="font-size:13px; opacity:0.7;">
+              #${productId}
+            </div>
+          </div>
 
-            <span>
-              <strong>
-                #${product.id}
-              </strong>
-              -
-              ${escapeHtml(product.name)}
+          <button
+            type="button"
+            class="btn btn-secondary folder-product-up"
+            title="Đưa lên"
+          >
+            ↑
+          </button>
 
-              <small>
-                (${Number(product.price).toLocaleString("vi-VN")}đ)
-              </small>
-            </span>
+          <button
+            type="button"
+            class="btn btn-secondary folder-product-down"
+            title="Đưa xuống"
+          >
+            ↓
+          </button>
 
-          </label>
-        `;
+        </div>
+      `;
+    }).join("");
 
-      }).join("");
+    // Nút ↑
+    list.querySelectorAll(
+      ".folder-product-up"
+    ).forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        const item =
+          button.closest(".folder-product-item");
+
+        if (!item) return;
+
+        const previous =
+          item.previousElementSibling;
+
+        if (!previous) return;
+
+        item.parentNode.insertBefore(
+          item,
+          previous
+        );
+      });
+
+    });
+
+    // Nút ↓
+    list.querySelectorAll(
+      ".folder-product-down"
+    ).forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        const item =
+          button.closest(".folder-product-item");
+
+        if (!item) return;
+
+        const next =
+          item.nextElementSibling;
+
+        if (!next) return;
+
+        item.parentNode.insertBefore(
+          next,
+          item
+        );
+      });
+
+    });
 
   } catch (error) {
 
     console.error(
-      "OPEN FOLDER PRODUCTS ERROR:",
+      "LOAD FOLDER PRODUCTS ERROR:",
       error
     );
 
     list.innerHTML =
-      `<p>Không thể tải sản phẩm: ${
-        escapeHtml(
-          error.message || "Lỗi không xác định"
-        )
-      }</p>`;
+      "<p>Không thể tải sản phẩm.</p>";
   }
 }
-
-
-async function saveFolderProducts() {
-
-  if (!currentFolderId) {
-    return;
-  }
-
-  const selected =
-    Array.from(
-      document.querySelectorAll(
-        ".folder-product-checkbox:checked"
-      )
-    ).map(
-      checkbox =>
-        Number(checkbox.value)
-    );
-
-  try {
-
-    await API.put(
-      `/admin/folders/${currentFolderId}/products`,
-      {
-        product_ids: selected
-      }
-    );
-
-    alert(
-      "Đã cập nhật sản phẩm trong Folder."
-    );
-
-    closeFolderProducts();
-
-  } catch (error) {
-
-    console.error(
-      "SAVE FOLDER PRODUCTS ERROR:",
-      error
-    );
-
-    alert(
-      error.message ||
-      "Không thể cập nhật sản phẩm."
-    );
-  }
-}
-
-
-function closeFolderProducts() {
-
-  const modal =
-    document.getElementById(
-      "folderProductsModal"
-    );
-
-  if (modal) {
-    modal.style.display = "none";
-  }
-
-  currentFolderId = null;
-}
-function openFolderForm(folderId = null) {
-  const form = document.getElementById("folderForm");
-
-  if (!form) {
-    return;
-  }
-
-  currentFolderId = folderId;
-
-  const folder = folderId
-    ? folders.find(
-        item => Number(item.id) === Number(folderId)
-      )
-    : null;
-
-  document.getElementById("folderId").value =
-    folder ? folder.id : "";
-
-  document.getElementById("folderName").value =
-    folder ? folder.name : "";
-
-  document.getElementById("folderButtonText").value =
-    folder
-      ? folder.button_text
-      : "XEM SẢN PHẨM";
-
-  document.getElementById("folderDescription").value =
-    folder
-      ? folder.description || ""
-      : "";
-
-  document.getElementById("folderImageUrl").value =
-    folder
-      ? folder.image_url || ""
-      : "";
-
-  document.getElementById("folderSortOrder").value =
-    folder
-      ? folder.sort_order
-      : 0;
-
-  document.getElementById("folderIsActive").checked =
-    folder
-      ? folder.is_active
-      : true;
-
-  form.style.display = "block";
-
-  form.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-}
-function closeFolderForm() {
-  const form = document.getElementById("folderForm");
-
-  if (form) {
-    form.style.display = "none";
-  }
-
-  currentFolderId = null;
-}
-async function saveFolder() {
-  const folderId =
-    document.getElementById("folderId").value.trim();
-
-  const name =
-    document.getElementById("folderName").value.trim();
-
-  const buttonText =
-    document.getElementById("folderButtonText").value.trim();
-
-  const description =
-    document.getElementById("folderDescription").value.trim();
-
-  const imageUrl =
-    document.getElementById("folderImageUrl").value.trim();
-
-  const sortOrder =
-    Number(
-      document.getElementById("folderSortOrder").value
-    ) || 0;
-
-  const isActive =
-    document.getElementById("folderIsActive").checked;
-
-  if (!name) {
-    alert("Vui lòng nhập tên Folder.");
-    return;
-  }
-
-  const data = {
-    name,
-    button_text:
-      buttonText || "XEM SẢN PHẨM",
-    description,
-    image_url: imageUrl,
-    sort_order: sortOrder,
-    is_active: isActive
-  };
-
-  try {
-
-    if (folderId) {
-
-      await API.put(
-        `/admin/folders/${folderId}`,
-        data
-      );
-
-      alert("Đã cập nhật Folder.");
-
-    } else {
-
-      await API.post(
-        "/admin/folders",
-        data
-      );
-
-      alert("Đã tạo Folder.");
-    }
-
-    closeFolderForm();
-
-    await loadFolders();
-
-  } catch (error) {
-
-    console.error(
-      "SAVE FOLDER ERROR:",
-      error
-    );
-
-    alert(
-      error.message ||
-      "Không thể lưu Folder."
-    );
-  }
-}
-async function deleteFolder(folderId) {
-  const folder = folders.find(
-    item => Number(item.id) === Number(folderId)
-  );
-
-  if (!folder) {
-    return;
-  }
-
-  const confirmed = confirm(
-    `Bạn có chắc muốn xóa Folder "${folder.name}" không?`
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
-  try {
-
-    await API.delete(
-      `/admin/folders/${folderId}`
-    );
-
-    alert("Đã xóa Folder.");
-
-    await loadFolders();
-
-  } catch (error) {
-
-    console.error(
-      "DELETE FOLDER ERROR:",
-      error
-    );
-
-    alert(
-      error.message ||
-      "Không thể xóa Folder."
-    );
-  }
-}
-function initFolderEvents() {
-  const newFolderButton =
-    document.getElementById("newFolderButton");
-
-  if (newFolderButton) {
-    newFolderButton.addEventListener(
-      "click",
-      () => {
-        openFolderForm();
-      }
-    );
-  }
-
-  const saveFolderButton =
-    document.getElementById("saveFolderButton");
-
-  if (saveFolderButton) {
-    saveFolderButton.addEventListener(
-      "click",
-      saveFolder
-    );
-  }
-
-  const cancelFolderButton =
-    document.getElementById("cancelFolderButton");
-
-  if (cancelFolderButton) {
-    cancelFolderButton.addEventListener(
-      "click",
-      closeFolderForm
-    );
-  }
-}
-  const saveFolderProductsButton =
-    document.getElementById(
-      "saveFolderProductsButton"
-    );
-
-  if (saveFolderProductsButton) {
-    saveFolderProductsButton.addEventListener(
-      "click",
-      saveFolderProducts
-    );
-  }
-
-  const closeFolderProductsButton =
-    document.getElementById(
-      "closeFolderProductsButton"
-    );
-
-  if (closeFolderProductsButton) {
-    closeFolderProductsButton.addEventListener(
-      "click",
-      closeFolderProducts
-    );
-  }
 // ============================
 // PRODUCT MODAL
 // ============================
