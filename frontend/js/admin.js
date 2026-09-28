@@ -10,6 +10,8 @@ let products = [];
 let currentKeyProductId = null;
 let folders = [];
 let currentFolderId = null;
+let announcements = [];
+let currentAnnouncementId = null;
 
 
 // ============================
@@ -738,7 +740,356 @@ async function loadFolders() {
   }
 }
 
+// =====================================
+// SHOP ANNOUNCEMENTS
+// =====================================
 
+async function loadAnnouncements() {
+  try {
+    const result = await API.get("/admin/announcements");
+
+    announcements = result.announcements || [];
+
+    renderAnnouncements();
+
+  } catch (error) {
+    console.error("LOAD ANNOUNCEMENTS ERROR:", error);
+
+    const list = document.getElementById(
+      "announcementsAdminList"
+    );
+
+    if (list) {
+      list.innerHTML = `
+        <tr>
+          <td colspan="6">
+            Không thể tải thông báo
+          </td>
+        </tr>
+      `;
+    }
+  }
+}
+
+function renderAnnouncements() {
+  const list = document.getElementById(
+    "announcementsAdminList"
+  );
+
+  if (!list) return;
+
+  if (!announcements.length) {
+    list.innerHTML = `
+      <tr>
+        <td colspan="6">
+          Chưa có thông báo nào.
+        </td>
+      </tr>
+    `;
+
+    bindAnnouncementButtons();
+    return;
+  }
+
+  list.innerHTML = announcements
+    .map(announcement => {
+      const status = announcement.is_active
+        ? "ACTIVE"
+        : "OFF";
+
+      const safeTitle = escapeHtml(
+        announcement.title || ""
+      );
+
+      const safeContent = escapeHtml(
+        announcement.content || ""
+      );
+
+      return `
+        <tr>
+          <td>${announcement.id}</td>
+
+          <td>
+            ${safeTitle}
+          </td>
+
+          <td>
+            ${safeContent}
+          </td>
+
+          <td>
+            ${announcement.sort_order}
+          </td>
+
+          <td>
+            <span class="status-badge ${
+              announcement.is_active
+                ? "status-active"
+                : "status-inactive"
+            }">
+              ${status}
+            </span>
+          </td>
+
+          <td>
+            <button
+              type="button"
+              class="btn btn-small btn-primary announcement-edit-button"
+              data-id="${announcement.id}"
+            >
+              SỬA
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-small btn-danger announcement-delete-button"
+              data-id="${announcement.id}"
+            >
+              XÓA
+            </button>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  bindAnnouncementButtons();
+}
+
+function bindAnnouncementButtons() {
+  document
+    .querySelectorAll(".announcement-edit-button")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        const id = Number(button.dataset.id);
+
+        const announcement =
+          announcements.find(
+            item => Number(item.id) === id
+          );
+
+        if (!announcement) return;
+
+        currentAnnouncementId = id;
+
+        document.getElementById(
+          "announcementId"
+        ).value = announcement.id;
+
+        document.getElementById(
+          "announcementTitle"
+        ).value = announcement.title || "";
+
+        document.getElementById(
+          "announcementContent"
+        ).value = announcement.content || "";
+
+        document.getElementById(
+          "announcementSortOrder"
+        ).value =
+          announcement.sort_order ?? 0;
+
+        document.getElementById(
+          "announcementIsActive"
+        ).checked =
+          Boolean(announcement.is_active);
+
+        document.getElementById(
+          "announcementForm"
+        ).style.display = "block";
+      });
+    });
+
+
+  document
+    .querySelectorAll(".announcement-delete-button")
+    .forEach(button => {
+      button.addEventListener("click", async () => {
+        const id = Number(button.dataset.id);
+
+        const announcement =
+          announcements.find(
+            item => Number(item.id) === id
+          );
+
+        if (!announcement) return;
+
+        const confirmed = confirm(
+          `Bạn có chắc muốn xóa thông báo "${announcement.title}"?`
+        );
+
+        if (!confirmed) return;
+
+        try {
+          await API.delete(
+            `/admin/announcements/${id}`
+          );
+
+          alert("Đã xóa thông báo.");
+
+          await loadAnnouncements();
+
+        } catch (error) {
+          console.error(
+            "DELETE ANNOUNCEMENT ERROR:",
+            error
+          );
+
+          alert(
+            error.message ||
+            "Không thể xóa thông báo."
+          );
+        }
+      });
+    });
+}
+function openAnnouncementForm(announcement = null) {
+  const form = document.getElementById(
+    "announcementForm"
+  );
+
+  if (!form) return;
+
+  if (announcement) {
+    currentAnnouncementId = Number(
+      announcement.id
+    );
+
+    document.getElementById(
+      "announcementId"
+    ).value = announcement.id;
+
+    document.getElementById(
+      "announcementTitle"
+    ).value = announcement.title || "";
+
+    document.getElementById(
+      "announcementContent"
+    ).value = announcement.content || "";
+
+    document.getElementById(
+      "announcementSortOrder"
+    ).value =
+      announcement.sort_order ?? 0;
+
+    document.getElementById(
+      "announcementIsActive"
+    ).checked =
+      Boolean(announcement.is_active);
+
+  } else {
+    currentAnnouncementId = null;
+
+    document.getElementById(
+      "announcementId"
+    ).value = "";
+
+    document.getElementById(
+      "announcementTitle"
+    ).value = "";
+
+    document.getElementById(
+      "announcementContent"
+    ).value = "";
+
+    document.getElementById(
+      "announcementSortOrder"
+    ).value = 0;
+
+    document.getElementById(
+      "announcementIsActive"
+    ).checked = true;
+  }
+
+  form.style.display = "block";
+
+  form.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+}
+function saveAnnouncement() {
+  const title = document.getElementById(
+    "announcementTitle"
+  ).value.trim();
+
+  const content = document.getElementById(
+    "announcementContent"
+  ).value.trim();
+
+  const sortOrder = Number(
+    document.getElementById(
+      "announcementSortOrder"
+    ).value
+  ) || 0;
+
+  const isActive =
+    document.getElementById(
+      "announcementIsActive"
+    ).checked;
+
+  if (!title) {
+    alert("Vui lòng nhập tiêu đề thông báo.");
+    return;
+  }
+
+  if (!content) {
+    alert("Vui lòng nhập nội dung thông báo.");
+    return;
+  }
+
+  const data = {
+    title,
+    content,
+    sort_order: sortOrder,
+    is_active: isActive
+  };
+
+  const request = currentAnnouncementId
+    ? API.put(
+        `/admin/announcements/${currentAnnouncementId}`,
+        data
+      )
+    : API.post(
+        "/admin/announcements",
+        data
+      );
+
+  request
+    .then(() => {
+      alert(
+        currentAnnouncementId
+          ? "Đã cập nhật thông báo."
+          : "Đã thêm thông báo."
+      );
+
+      closeAnnouncementForm();
+
+      return loadAnnouncements();
+    })
+    .catch(error => {
+      console.error(
+        "SAVE ANNOUNCEMENT ERROR:",
+        error
+      );
+
+      alert(
+        error.message ||
+        "Không thể lưu thông báo."
+      );
+    });
+}
+function closeAnnouncementForm() {
+  const form = document.getElementById(
+    "announcementForm"
+  );
+
+  if (form) {
+    form.style.display = "none";
+  }
+
+  currentAnnouncementId = null;
+}
 function renderFolders() {
   const container =
     document.getElementById("foldersAdminList");
@@ -1709,10 +2060,12 @@ async function initAdmin() {
     loadUsers(),
     loadProducts(),
     loadOrders(),
-    loadFolders()
+    loadFolders(),
+    loadAnnouncements()
   ]);
 
   initFolderEvents();
+  initAnnouncementEvents();
 }
 
 initAdmin();
