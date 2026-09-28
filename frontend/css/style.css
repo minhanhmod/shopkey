@@ -3322,3 +3322,181 @@ footer {
     font-size: 14px;
   }
 }
+/* ========================= */
+/* ADMIN FOLDER + ANNOUNCEMENT FORMS */
+/* ========================= */
+
+#folderForm,
+#announcementForm {
+  width: 100%;
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 26px;
+
+  box-sizing: border-box;
+
+  background: #0b0d12;
+  border: 1px solid #252a35;
+  border-radius: 12px;
+
+  color: #fff;
+
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.35);
+}
+
+#folderForm .admin-form-group,
+#announcementForm .admin-form-group {
+  margin-bottom: 20px;
+}
+
+#folderForm label,
+#announcementForm label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #cbd5e1;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+#folderForm input[type="text"],
+#folderForm input[type="number"],
+#folderForm textarea,
+#announcementForm input[type="text"],
+#announcementForm input[type="number"],
+#announcementForm textarea {
+  display: block;
+
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 12px 14px;
+
+  border: 1px solid #303744;
+  border-radius: 7px;
+
+  background: #11151d;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 15px;
+
+  outline: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+#folderForm input[type="text"]:focus,
+#folderForm input[type="number"]:focus,
+#folderForm textarea:focus,
+#announcementForm input[type="text"]:focus,
+#announcementForm input[type="number"]:focus,
+#announcementForm textarea:focus {
+  border-color: #a8ff00;
+
+  box-shadow:
+    0 0 0 3px rgba(168, 255, 0, 0.12);
+}
+
+#folderForm textarea,
+#announcementForm textarea {
+  min-height: 140px;
+
+  resize: vertical;
+
+  line-height: 1.6;
+}
+
+#folderForm .admin-form-row,
+#announcementForm .admin-form-row {
+  display: grid;
+
+  grid-template-columns:
+    minmax(160px, 220px)
+    minmax(0, 1fr);
+
+  gap: 22px;
+
+  align-items: start;
+}
+
+#folderForm .checkbox-label,
+#announcementForm .checkbox-label {
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  margin-top: 8px;
+
+  cursor: pointer;
+}
+
+#folderForm .checkbox-label input,
+#announcementForm .checkbox-label input {
+  width: 18px;
+  height: 18px;
+
+  margin: 0;
+
+  accent-color: #a8ff00;
+
+  cursor: pointer;
+}
+
+#folderForm .admin-form-actions,
+#announcementForm .admin-form-actions {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 12px;
+
+  margin-top: 26px;
+}
+
+#folderForm .admin-form-actions .btn,
+#announcementForm .admin-form-actions .btn {
+  width: auto;
+  min-width: 145px;
+
+  padding: 12px 20px;
+
+  border-radius: 7px;
+
+  cursor: pointer;
+
+  font-weight: 800;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+  #folderForm,
+  #announcementForm {
+    padding: 18px;
+  }
+
+  #folderForm .admin-form-row,
+  #announcementForm .admin-form-row {
+    grid-template-columns: 1fr;
+
+    gap: 0;
+  }
+
+  #folderForm .admin-form-actions,
+  #announcementForm .admin-form-actions {
+    flex-direction: column;
+  }
+
+  #folderForm .admin-form-actions .btn,
+  #announcementForm .admin-form-actions .btn {
+    width: 100%;
+  }
+}
