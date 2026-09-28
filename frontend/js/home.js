@@ -1063,5 +1063,103 @@ async function initHome() {
   await loadProducts();
 
 }
+// =========================
+// SHOP ANNOUNCEMENT POPUP
+// =========================
 
+async function loadShopAnnouncement() {
+  try {
+    const result = await API.get(
+      "/products/announcements/list"
+    );
+
+    const announcements =
+      result.announcements || [];
+
+    if (!announcements.length) {
+      return;
+    }
+
+    const announcement =
+      announcements[0];
+
+    const overlay =
+      document.getElementById(
+        "announcementOverlay"
+      );
+
+    const title =
+      document.getElementById(
+        "announcementPopupTitle"
+      );
+
+    const content =
+      document.getElementById(
+        "announcementPopupContent"
+      );
+
+    if (!overlay || !title || !content) {
+      return;
+    }
+
+    title.textContent =
+      announcement.title || "";
+
+    content.textContent =
+      announcement.content || "";
+
+    overlay.style.display = "flex";
+
+  } catch (error) {
+    console.error(
+      "LOAD SHOP ANNOUNCEMENT ERROR:",
+      error
+    );
+  }
+}
+
+function closeShopAnnouncement() {
+  const overlay =
+    document.getElementById(
+      "announcementOverlay"
+    );
+
+  if (overlay) {
+    overlay.style.display = "none";
+  }
+}
+
+function initShopAnnouncement() {
+  const closeButton =
+    document.getElementById(
+      "closeAnnouncementPopup"
+    );
+
+  if (closeButton) {
+    closeButton.addEventListener(
+      "click",
+      closeShopAnnouncement
+    );
+  }
+
+  const overlay =
+    document.getElementById(
+      "announcementOverlay"
+    );
+
+  if (overlay) {
+    overlay.addEventListener(
+      "click",
+      event => {
+        if (event.target === overlay) {
+          closeShopAnnouncement();
+        }
+      }
+    );
+  }
+
+  loadShopAnnouncement();
+}
+
+initShopAnnouncement();
 initHome();
