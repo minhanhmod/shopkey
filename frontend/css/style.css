@@ -3180,7 +3180,7 @@ footer {
     0 0 12px currentColor,
     0 0 22px currentColor;
 
-animation: announcementTitleColor 0.6s steps(1, end) infinite;
+animation: announcementTitleColor 0.3s steps(1, end) infinite;
 
   overflow-wrap: anywhere;
 }
