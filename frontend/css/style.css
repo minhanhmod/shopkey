@@ -3166,10 +3166,21 @@ footer {
 }
 
 .announcement-title {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: #ffffff;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  line-height: 1.2;
+
+  color: #00eaff;
+
+  text-transform: uppercase;
+
+  text-shadow:
+    0 0 5px currentColor,
+    0 0 12px currentColor,
+    0 0 22px currentColor;
+
+  animation: announcementTitleColor 3s linear infinite;
 
   overflow-wrap: anywhere;
 }
@@ -3279,7 +3290,31 @@ footer {
     transform: scale(1);
   }
 }
+@keyframes announcementTitleColor {
+  0% {
+    color: #00eaff;
+  }
 
+  20% {
+    color: #168cff;
+  }
+
+  40% {
+    color: #a855f7;
+  }
+
+  60% {
+    color: #ff2bd6;
+  }
+
+  80% {
+    color: #ffea00;
+  }
+
+  100% {
+    color: #00eaff;
+  }
+}
 @keyframes announcementPixelFloat {
   0% {
     opacity: 0;
@@ -3313,9 +3348,10 @@ footer {
     padding: 10px 12px;
   }
 
-  .announcement-title {
-    font-size: 15px;
-  }
+.announcement-title {
+  font-size: 21px;
+  letter-spacing: 1px;
+}
 
   .announcement-content {
     padding: 15px;
