@@ -765,5 +765,37 @@ router.get("/folders/list", async (req, res) => {
     });
   }
 });
+// =====================================================
+// GET ACTIVE SHOP ANNOUNCEMENTS
+// Public
+// =====================================================
 
+router.get("/announcements/list", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id,
+        title,
+        content,
+        sort_order
+      FROM shop_announcements
+      WHERE is_active = true
+      ORDER BY sort_order ASC, id DESC
+    `);
+
+    return res.json({
+      announcements: result.rows
+    });
+
+  } catch (error) {
+    console.error(
+      "GET ANNOUNCEMENTS ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      message: "Không thể lấy thông báo"
+    });
+  }
+});
 export default router;
