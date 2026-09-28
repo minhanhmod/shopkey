@@ -1528,6 +1528,242 @@ function initFolderEvents() {
     );
   }
 }
+function openFolderForm(folderId = null) {
+  const form =
+    document.getElementById("folderForm");
+
+  if (!form) return;
+
+  const folder = folderId
+    ? folders.find(
+        item =>
+          Number(item.id) === Number(folderId)
+      )
+    : null;
+
+  document.getElementById(
+    "folderId"
+  ).value = folder?.id || "";
+
+  document.getElementById(
+    "folderName"
+  ).value = folder?.name || "";
+
+  document.getElementById(
+    "folderButtonText"
+  ).value =
+    folder?.button_text || "XEM SẢN PHẨM";
+
+  document.getElementById(
+    "folderDescription"
+  ).value =
+    folder?.description || "";
+
+  document.getElementById(
+    "folderImageUrl"
+  ).value =
+    folder?.image_url || "";
+
+  document.getElementById(
+    "folderSortOrder"
+  ).value =
+    folder?.sort_order ?? 0;
+
+  document.getElementById(
+    "folderIsActive"
+  ).checked =
+    folder?.is_active !== false;
+
+  form.style.display = "block";
+
+  form.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+}
+
+
+function closeFolderForm() {
+  const form =
+    document.getElementById("folderForm");
+
+  if (form) {
+    form.style.display = "none";
+  }
+
+  document.getElementById(
+    "folderId"
+  ).value = "";
+}
+
+
+async function saveFolder() {
+  const id =
+    document.getElementById(
+      "folderId"
+    ).value;
+
+  const name =
+    document.getElementById(
+      "folderName"
+    ).value.trim();
+
+  const buttonText =
+    document.getElementById(
+      "folderButtonText"
+    ).value.trim();
+
+  const description =
+    document.getElementById(
+      "folderDescription"
+    ).value.trim();
+
+  const imageUrl =
+    document.getElementById(
+      "folderImageUrl"
+    ).value.trim();
+
+  const sortOrder =
+    Number(
+      document.getElementById(
+        "folderSortOrder"
+      ).value
+    ) || 0;
+
+  const isActive =
+    document.getElementById(
+      "folderIsActive"
+    ).checked;
+
+  if (!name) {
+    alert("Vui lòng nhập tên Folder.");
+    return;
+  }
+
+  const data = {
+    name,
+    button_text:
+      buttonText || "XEM SẢN PHẨM",
+    description,
+    image_url: imageUrl,
+    sort_order: sortOrder,
+    is_active: isActive
+  };
+
+  try {
+    if (id) {
+      await API.put(
+        `/admin/folders/${id}`,
+        data
+      );
+
+      alert("Đã cập nhật Folder.");
+
+    } else {
+      await API.post(
+        "/admin/folders",
+        data
+      );
+
+      alert("Đã tạo Folder.");
+    }
+
+    closeFolderForm();
+
+    await loadFolders();
+
+  } catch (error) {
+    console.error(
+      "SAVE FOLDER ERROR:",
+      error
+    );
+
+    alert(
+      error.message ||
+      "Không thể lưu Folder."
+    );
+  }
+}
+
+
+async function deleteFolder(folderId) {
+  const folder =
+    folders.find(
+      item =>
+        Number(item.id) ===
+        Number(folderId)
+    );
+
+  if (!folder) return;
+
+  const confirmed = confirm(
+    `Bạn có chắc muốn xóa Folder "${folder.name}"?`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await API.delete(
+      `/admin/folders/${folderId}`
+    );
+
+    alert("Đã xóa Folder.");
+
+    await loadFolders();
+
+  } catch (error) {
+    console.error(
+      "DELETE FOLDER ERROR:",
+      error
+    );
+
+    alert(
+      error.message ||
+      "Không thể xóa Folder."
+    );
+  }
+}
+
+
+function initFolderCrudEvents() {
+  const newButton =
+    document.getElementById(
+      "newFolderButton"
+    );
+
+  if (newButton) {
+    newButton.addEventListener(
+      "click",
+      () => {
+        openFolderForm();
+      }
+    );
+  }
+
+  const saveButton =
+    document.getElementById(
+      "saveFolderButton"
+    );
+
+  if (saveButton) {
+    saveButton.addEventListener(
+      "click",
+      saveFolder
+    );
+  }
+
+  const cancelButton =
+    document.getElementById(
+      "cancelFolderButton"
+    );
+
+  if (cancelButton) {
+    cancelButton.addEventListener(
+      "click",
+      closeFolderForm
+    );
+  }
+}
 // ============================
 // PRODUCT MODAL
 // ============================
@@ -2101,7 +2337,8 @@ async function initAdmin() {
   ]);
 
   initFolderEvents();
-  initAnnouncementEvents();
+initFolderCrudEvents();
+initAnnouncementEvents();
 }
 
 initAdmin();
