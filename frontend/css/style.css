@@ -3180,7 +3180,7 @@ footer {
     0 0 12px currentColor,
     0 0 22px currentColor;
 
-  animation: announcementTitleColor 3s linear infinite;
+animation: announcementTitleColor 0.6s steps(1, end) infinite;
 
   overflow-wrap: anywhere;
 }
@@ -3291,28 +3291,14 @@ footer {
   }
 }
 @keyframes announcementTitleColor {
-  0% {
-    color: #00eaff;
+  0%,
+  49% {
+    color: #a8ff00;
   }
 
-  20% {
-    color: #168cff;
-  }
-
-  40% {
-    color: #a855f7;
-  }
-
-  60% {
-    color: #ff2bd6;
-  }
-
-  80% {
-    color: #ffea00;
-  }
-
+  50%,
   100% {
-    color: #00eaff;
+    color: #ffffff;
   }
 }
 @keyframes announcementPixelFloat {
