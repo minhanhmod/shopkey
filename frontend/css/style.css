@@ -3088,3 +3088,28 @@ footer {
 .proxy-back-button:hover {
   background: #bbf7d0;
 }
+/* =========================
+   FOLDER TABLE - SCROLL NGANG
+   ========================= */
+
+#foldersAdminList {
+  white-space: normal;
+}
+
+#foldersAdminList td:nth-child(3) {
+  min-width: 300px;
+  max-width: 500px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.admin-panel .table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-panel .admin-table {
+  min-width: 1100px;
+}
